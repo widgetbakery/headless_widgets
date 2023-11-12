@@ -383,11 +383,14 @@ bool _frameCallbacksScheduled = false;
 
 void _addPersistentFrameCallback(FrameCallback callback) {
   if (!_frameCallbacksScheduled) {
-    SchedulerBinding.instance.addPersistentFrameCallback((timestamp) {
-      final callbacks = List.of(_frameCallbacks);
-      for (final callback in callbacks) {
-        callback(timestamp);
-      }
+    // Microtask otherwise FlutterTest fails with ConcurrentModificationError.
+    Future.microtask(() {
+      SchedulerBinding.instance.addPersistentFrameCallback((timestamp) {
+        final callbacks = List.of(_frameCallbacks);
+        for (final callback in callbacks) {
+          callback(timestamp);
+        }
+      });
     });
     _frameCallbacksScheduled = true;
   }
