@@ -41,6 +41,24 @@
 </head>
 <body>
   <script>
+    // Hack to make Safari run better by disabling WebGL2.0
+    // https://www.reddit.com/r/FlutterDev/comments/127cwz8/this_piece_of_code_can_dramatically_improve_your/
+    if (
+      navigator.userAgent.indexOf("Safari") !== -1 &&
+      navigator.userAgent.indexOf("Chrome") === -1
+    ) {
+      var originalGetContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function () {
+        var contextType = arguments[0];
+        if (contextType === "webgl2") {
+          return;
+        }
+        return originalGetContext.apply(
+          this,
+          [contextType].concat(Array.prototype.slice.call(arguments, 1)),
+        );
+      };
+    }
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
