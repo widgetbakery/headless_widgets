@@ -19,38 +19,82 @@ class Button extends StatefulWidget {
   const Button({
     super.key,
     this.onPressed,
-    this.onPressedDown,
-    this.onKeyEvent,
     this.child,
     required this.builder,
+    this.onPressedDown,
+    this.pressDownDelay = Duration.zero,
+    this.onKeyEvent,
     this.focusNode,
     this.tapToFocus = false,
-    this.pressDownDelay = Duration.zero,
     this.keyUpTimeout,
     this.selected = SelectionState.off,
     this.cursor = SystemMouseCursors.basic,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
     this.isSemanticButton = true,
     this.touchExtraTolerance = EdgeInsets.zero,
+    this.mouseExtraTolerance = EdgeInsets.zero,
   });
+
+  /// Callback fired when button is pressed and released.
+  ///
+  /// If [onPressed] returns a [Future], the button will be considered
+  /// pressed until the future completes.
+  final FutureOr<void> Function()? onPressed;
+
+  /// Callback fired when button is pressed down, but not released yet.
+  /// The amount of time button has to be pressed down for the callback to
+  /// fire is determined by [pressDownDelay].
+  ///
+  /// In case when [onPressedDown] is fired, [onPressed] will not be fired.
+  ///
+  /// If [onPressedDown] returns a [Future], the button will be considered
+  /// pressed until the future completes.
+  final FutureOr<void> Function()? onPressedDown;
+
+  /// Controls the amount of time button has to be pressed down for
+  /// [onPressedDown] to fire. Defaults to [Duration.zero].
+  /// With non-zero [pressDownDelay] it is possible for long press to
+  /// trigger [onPressedDown], while short click will trigger [onPressed].
+  final Duration pressDownDelay;
+
+  /// Optional child to be passed to [builder].
+  final Widget? child;
+
+  /// Builder responsible for rendering the button.
+  final ButtonBuilder builder;
 
   final MouseCursor cursor;
   final SelectionState selected;
-  final VoidCallback? onPressed;
-  final FutureOr<void> Function()? onPressedDown;
+
+  /// Optional callback to be called when key event is received.
   final KeyEventResult? Function(KeyEvent)? onKeyEvent;
+
+  /// Optional focus node to be used for this button. If not specified
+  /// button will manage the focus node internally.
   final FocusNode? focusNode;
-  final Widget? child;
-  final ButtonBuilder builder;
+
+  /// If set to true, button will request focus when tapped. This is common
+  /// behavior on Windows.
   final bool tapToFocus;
+
+  /// If set to true, button will be considered a button in accessibility
+  /// tree. Defaults to true.
   final bool isSemanticButton;
+
+  /// Extra inset to be added to button bounds on touch devices when determining
+  /// whether button is considered pressed while being in [ControlState.tracked] state.
   final EdgeInsets touchExtraTolerance;
-  final Duration pressDownDelay;
+
+  /// Extra inset to be added to button bounds for mouse devices when determining
+  /// whether button is considered pressed while being in [ControlState.tracked] state.
+  final EdgeInsets mouseExtraTolerance;
 
   /// If set the button will be considered pressed when `keyUpTimeout`
-  /// elapsed after the key down event.
+  /// elapsed after the key down event. This is common behavior on macOS
+  /// and Linux.
   final Duration? keyUpTimeout;
 
+  /// Controls how the button behaves during hit testing.
   final HitTestBehavior hitTestBehavior;
 
   @override
@@ -111,9 +155,9 @@ class _ButtonState extends State<Button> with MouseCapture {
   bool _inside = false;
   bool _tracked = false;
   bool _keyPressed = false;
-  bool _futurePressed = false;
+  bool _waitingOnFuture = false;
 
-  bool get _pressed => (_tracked && _inside) || _keyPressed || _futurePressed;
+  bool get _pressed => (_tracked && _inside) || _keyPressed;
 
   bool get _enabled => widget.onPressed != null || widget.onPressedDown != null;
 
@@ -140,7 +184,7 @@ class _ButtonState extends State<Button> with MouseCapture {
         _keyPressed = keyPressed;
       }
       if (futurePressed != null) {
-        _futurePressed = futurePressed;
+        _waitingOnFuture = futurePressed;
       }
     });
     if (!pressedBefore && _pressed) {
@@ -170,7 +214,7 @@ class _ButtonState extends State<Button> with MouseCapture {
       }
     }
 
-    if (pressedBefore && !_keyPressed && !_tracked && !_futurePressed && !cancelled) {
+    if (pressedBefore && !_keyPressed && !_tracked && !_waitingOnFuture && !cancelled) {
       if (!_didFireLongPress) {
         _onPressed();
       }
@@ -195,7 +239,15 @@ class _ButtonState extends State<Button> with MouseCapture {
 
   void _onPressed() {
     if (widget.onPressed != null) {
-      widget.onPressed?.call();
+      final res = widget.onPressed?.call();
+      if (res is Future) {
+        _update(futurePressed: true);
+        res.then((value) {
+          _update(futurePressed: false);
+        }, onError: (error) {
+          _update(futurePressed: false);
+        });
+      }
     }
     _keyUpTimer?.cancel();
     _keyUpTimer = null;
@@ -291,6 +343,8 @@ class _ButtonState extends State<Button> with MouseCapture {
     Rect bounds = (Offset.zero & context.size!);
     if (kind == PointerDeviceKind.touch) {
       bounds = widget.touchExtraTolerance.inflateRect(bounds);
+    } else if (kind == PointerDeviceKind.mouse) {
+      bounds = widget.mouseExtraTolerance.inflateRect(bounds);
     }
     final isInside = bounds.contains(details.localPosition);
     _update(inside: isInside);
@@ -372,14 +426,14 @@ class _ButtonState extends State<Button> with MouseCapture {
       enabled: _enabled,
       focused: _enabled && focusNode.hasFocus,
       hovered: _enabled && _hovered && !_tracked,
-      pressed: _enabled && _pressed,
+      pressed: _enabled && (_pressed || _waitingOnFuture),
       tracked: _enabled && _tracked,
     );
     return Semantics(
       button: widget.isSemanticButton,
       container: true,
       enabled: _enabled,
-      onTap: widget.onPressed,
+      onTap: _onPressed,
       child: Focus.withExternalFocusNode(
         focusNode: focusNode,
         onFocusChange: (_) {

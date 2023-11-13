@@ -16,14 +16,16 @@ class _TestButton extends StatelessWidget {
     this.pressDownDelay = Duration.zero,
     required this.onStateChanged,
     this.touchExtraTolerance = EdgeInsets.zero,
+    this.mouseExtraTolerance = EdgeInsets.zero,
     this.keyUpTimeout,
   });
 
-  final VoidCallback? onPressed;
+  final FutureOr<void> Function()? onPressed;
   final FutureOr<void> Function()? onPressedDown;
   final ValueChanged<ControlState> onStateChanged;
   final Duration pressDownDelay;
   final EdgeInsets touchExtraTolerance;
+  final EdgeInsets mouseExtraTolerance;
   final Duration? keyUpTimeout;
 
   @override
@@ -41,6 +43,7 @@ class _TestButton extends StatelessWidget {
         );
       },
       touchExtraTolerance: touchExtraTolerance,
+      mouseExtraTolerance: mouseExtraTolerance,
     );
   }
 }
@@ -448,6 +451,73 @@ void main() {
       ),
     );
 
+    testWidgets('button remains pressed while callback future completes', (tester) async {
+      const button = ValueKey('button');
+      bool pressed;
+      late ControlState state;
+      late Completer<void> completer;
+      await tester.pumpWidget(
+        Center(
+          child: _TestButton(
+            key: button,
+            onPressed: () {
+              pressed = true;
+              return completer.future;
+            },
+            onStateChanged: (s) {
+              state = s;
+            },
+          ),
+        ),
+      );
+
+      final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+
+      for (int i = 0; i < 2; ++i) {
+        pressed = false;
+        completer = Completer<void>();
+
+        await gesture.moveTo(Offset.zero);
+        await tester.pump();
+
+        expect(state, ControlState(enabled: true));
+
+        await gesture.down(tester.getCenter(find.byKey(button)));
+        await tester.pump();
+
+        expect(
+          state,
+          ControlState(enabled: true, tracked: true, pressed: true),
+        );
+        expect(pressed, isFalse);
+
+        await gesture.up();
+        await tester.pump();
+
+        expect(
+          state,
+          ControlState(enabled: true, tracked: false, pressed: true),
+        );
+        expect(pressed, isTrue);
+
+        // Make sure that while waiting for Future to complete the clicking does not result
+        // in onPressed being called again.
+        pressed = false;
+
+        await gesture.down(tester.getCenter(find.byKey(button)));
+        await tester.pump();
+
+        await gesture.up();
+        await tester.pump();
+
+        completer.complete();
+        await tester.pumpAndSettle(); // required to flush microtasks.
+
+        expect(state, ControlState(enabled: true, hovered: isMouse));
+        expect(pressed, false);
+      }
+    });
+
     testWidgets(
       'pressed state works correctly when dragging pointer',
       (tester) async {
@@ -625,6 +695,89 @@ void main() {
           );
 
           expect(pressed, isTouch);
+        }
+      },
+      variant: const TargetPlatformVariant(
+        {TargetPlatform.macOS, TargetPlatform.iOS},
+      ),
+    );
+
+    testWidgets(
+      'mouseExtraTolerance is respected',
+      (tester) async {
+        const button = ValueKey('button1');
+        late ControlState state;
+        bool pressed;
+
+        await tester.pumpWidget(
+          Center(
+            child: _TestButton(
+              key: button,
+              onPressed: () {
+                pressed = true;
+              },
+              pressDownDelay: const Duration(seconds: 1),
+              onStateChanged: (s) {
+                state = s;
+              },
+              mouseExtraTolerance: const EdgeInsets.all(20),
+            ),
+          ),
+        );
+
+        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+
+        final finder = find.byKey(button);
+
+        for (int i = 0; i < 2; ++i) {
+          pressed = false;
+
+          await gesture.down(tester.getCenter(finder));
+          await tester.pump();
+
+          expect(
+            state,
+            ControlState(enabled: true, tracked: true, pressed: true),
+          );
+
+          await gesture.moveTo(tester.getTopLeft(finder));
+          await tester.pump();
+
+          expect(
+            state,
+            ControlState(enabled: true, tracked: true, pressed: true),
+          );
+
+          await gesture.moveBy(const Offset(-10, -10));
+          await tester.pump();
+
+          expect(
+            state,
+            ControlState(enabled: true, tracked: true, pressed: isMouse),
+          );
+
+          await gesture.moveBy(const Offset(-11, -11));
+          await tester.pump();
+
+          expect(state, ControlState(enabled: true, tracked: true));
+
+          await gesture.moveBy(const Offset(11, 11));
+          await tester.pump();
+
+          expect(
+            state,
+            ControlState(enabled: true, tracked: true, pressed: isMouse),
+          );
+
+          await gesture.up();
+          await tester.pump();
+
+          expect(
+            state,
+            ControlState(enabled: true),
+          );
+
+          expect(pressed, isMouse);
         }
       },
       variant: const TargetPlatformVariant(
