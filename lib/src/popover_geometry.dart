@@ -9,7 +9,7 @@ enum PopoverEdge {
 
 /// Describes the attachment of the popover relative to the anchor.
 class PopoverAttachment {
-  PopoverAttachment({
+  const PopoverAttachment({
     required this.anchor,
     required this.popover,
   });
@@ -47,7 +47,7 @@ class PopoverAttachment {
     final popoverRect = offset & popoverSize;
     if (popoverRect.top >= anchorRect.bottom) {
       offset = offset.translate(0, distance);
-    } else if (popoverRect.bottom <= anchorRect.bottom) {
+    } else if (popoverRect.bottom <= anchorRect.top) {
       offset = offset.translate(0, -distance);
     } else if (popoverRect.left >= anchorRect.right) {
       offset = offset.translate(distance, 0);
@@ -68,7 +68,7 @@ class PopoverAttachment {
 
 /// Describes actual geometry of popover after a successful layout pass.
 class PopoverGeometry {
-  PopoverGeometry({
+  const PopoverGeometry({
     required this.attachment,
     required this.requestedDistance,
     required this.anchor,
