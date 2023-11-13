@@ -78,12 +78,12 @@ void main() {
     key.currentState!._controller.showPopover(const Text('Popover')).then((_) {
       hidden = true;
     });
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Popover'), findsOneWidget);
     expect(hidden, isFalse);
 
     key.currentState!._controller.hidePopover();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Popover'), findsNothing);
     expect(hidden, isTrue);
   });
@@ -104,7 +104,7 @@ void main() {
     key.currentState!._controller.showPopover(const Text('Popover1')).then((_) {
       hidden1 = true;
     });
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Popover1'), findsOneWidget);
 
     key.currentState!._controller.showPopover(const Text('Popover2')).then((_) {
@@ -120,7 +120,7 @@ void main() {
     expect(hidden2, isFalse);
 
     key.currentState!._controller.hidePopover();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Popover2'), findsNothing);
 
     // Both futures only be completed now.
@@ -140,7 +140,7 @@ void main() {
     key.currentState!._controller.showPopover(const Text('Popover')).then((_) {
       hidden = true;
     });
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Popover'), findsOneWidget);
 
     await tester.pumpWidget(const TestApp(home: SizedBox.shrink()));
