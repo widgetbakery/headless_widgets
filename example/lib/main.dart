@@ -198,9 +198,9 @@ class _PopoverButtonState extends State<PopoverButton> {
     return PopoverAnchor(
       controller: _controller,
       delegate: () => SamplePopoverDelegate(attachments: [
-        PopoverAttachment(anchor: Alignment.centerLeft, popover: Alignment.centerRight),
-        PopoverAttachment(anchor: Alignment.bottomCenter, popover: Alignment.topCenter),
-        PopoverAttachment(anchor: Alignment.topCenter, popover: Alignment.bottomCenter),
+        const PopoverAttachment(anchor: Alignment.centerLeft, popover: Alignment.centerRight),
+        const PopoverAttachment(anchor: Alignment.bottomCenter, popover: Alignment.topCenter),
+        const PopoverAttachment(anchor: Alignment.topCenter, popover: Alignment.bottomCenter),
       ]),
       animationDuration: const Duration(milliseconds: 200),
       animationReverseDuration: const Duration(milliseconds: 150),
