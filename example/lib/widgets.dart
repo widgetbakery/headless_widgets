@@ -96,6 +96,7 @@ class SampleButton extends StatelessWidget {
     ButtonState state,
     Widget? child,
   ) {
+    final ps = PixelSnap.of(context);
     final borderColor = switch (state) {
       ButtonState(enabled: false) => Colors.blue.shade200,
       ButtonState(pressed: true) => Colors.blue.shade400,
@@ -124,7 +125,7 @@ class SampleButton extends StatelessWidget {
         decoration: ShapeDecoration(
           // border: Border.fromBorderSide(
           //   // borderRadius: BorderRadius.circular(6),
-          //   BorderSide(color: borderColor.withOpacity(0.5), width: 3),
+          //   BorderSide(color: borderColor, width: 1),
           // ),
           // borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           // boxShadow: [
@@ -136,8 +137,8 @@ class SampleButton extends StatelessWidget {
           // ],
           shape: CupertinoRectangleBorder(
             // borderRadius: BorderRadius.circular(6),
-            borderRadius: const BorderRadius.all(Radius.circular(6.0)),
-            side: BorderSide(color: borderColor, width: 1),
+            borderRadius: const BorderRadius.all(Radius.circular(6.0)).pixelSnap(ps),
+            side: BorderSide(color: borderColor, width: 1).pixelSnap(ps),
           ),
           shadows: [
             BoxShadow(
@@ -155,9 +156,14 @@ class SampleButton extends StatelessWidget {
             ],
           ),
         ),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(color: textColor),
-          child: child!,
+        child: Container(
+          child: DefaultTextStyle.merge(
+            style: TextStyle(
+              height: 1.17,
+              color: textColor,
+            ),
+            child: child!,
+          ),
         ),
       ),
     );

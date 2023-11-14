@@ -60,7 +60,11 @@ abstract class PopoverDelegate {
   ///
   /// When showing popover this method will be called before [computePosition] and
   /// then also the next frame.
-  Widget buildScaffold(BuildContext context, Widget child, Animation<double> animation);
+  Widget buildScaffold(
+    BuildContext context,
+    Widget child,
+    Animation<double> animation,
+  );
 
   Widget buildVeil(
     BuildContext context,
