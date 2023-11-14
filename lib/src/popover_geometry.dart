@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:headless/src/util.dart';
 
 enum PopoverEdge {
   top,
@@ -45,13 +46,13 @@ class PopoverAttachment {
     var offset = anchorPoint - popoverPoint;
 
     final popoverRect = offset & popoverSize;
-    if (popoverRect.top >= anchorRect.bottom) {
+    if (popoverRect.top >= anchorRect.bottom - kEpsilon) {
       offset = offset.translate(0, distance);
-    } else if (popoverRect.bottom <= anchorRect.top) {
+    } else if (popoverRect.bottom <= anchorRect.top + kEpsilon) {
       offset = offset.translate(0, -distance);
-    } else if (popoverRect.left >= anchorRect.right) {
+    } else if (popoverRect.left >= anchorRect.right - kEpsilon) {
       offset = offset.translate(distance, 0);
-    } else if (popoverRect.right <= anchorRect.left) {
+    } else if (popoverRect.right <= anchorRect.left + kEpsilon) {
       offset = offset.translate(-distance, 0);
     }
 
@@ -107,17 +108,9 @@ class PopoverGeometry {
   bool operator ==(Object other) {
     // Compare geometry with some tolerance to avoid needlessly triggering
     // reclip and repaint.
-    bool rectEquals(Rect r1, Rect r2) {
-      bool equals(double a, double b) => (a - b).abs() < 0.001;
-      return equals(r1.left, r2.left) &&
-          equals(r1.top, r2.top) &&
-          equals(r1.right, r2.right) &&
-          equals(r1.bottom, r2.bottom);
-    }
-
     return other is PopoverGeometry &&
-        rectEquals(anchor, other.anchor) &&
-        rectEquals(popover, other.popover) &&
+        rectsEqual(anchor, other.anchor) &&
+        rectsEqual(popover, other.popover) &&
         popoverWidgetInsets == other.popoverWidgetInsets &&
         calloutSize == other.calloutSize;
   }

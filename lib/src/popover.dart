@@ -217,7 +217,7 @@ class _PopoverAnchorState extends State<PopoverAnchor> with TickerProviderStateM
       _delegate = widget.delegate();
       _delegate!.setTickerProvider(this);
     }
-    return CustomMultiChildLayout(
+    return _CustomMultiChildLayout(
       delegate: _PopoverLayout(
         anchor: this.context,
         safeAreaInsets: MediaQuery.of(context).padding,
@@ -339,10 +339,14 @@ class _PopoverLayout extends MultiChildLayoutDelegate {
     if (hasChild(_Slot.popover)) {
       final bounds = Offset.zero & boundsSize;
       final renderObject = anchor.findRenderObject() as RenderBox;
-      final transform = renderObject.getTransformTo(null);
+      final anchorToWindow = renderObject.getTransformTo(null);
+      final windowToUs = _RenderCustomMultiChildLayoutBox._currentLayout!.getTransformTo(null)
+        ..invert();
       final anchorRect = (Offset.zero & anchorSize());
-      final transformed = MatrixUtils.transformRect(transform, anchorRect);
-
+      final transformed = MatrixUtils.transformRect(
+        windowToUs,
+        MatrixUtils.transformRect(anchorToWindow, anchorRect),
+      );
       final constraints = delegate.computeConstraints(
         bounds,
         safeAreaInsets,
@@ -400,4 +404,36 @@ void _addPersistentFrameCallback(FrameCallback callback) {
 void _removePersistentFrameCallback(FrameCallback callback) {
   _frameCallbacks.remove(callback);
   // There is no way to unschedule persistent frame callback in Flutter.
+}
+
+class _CustomMultiChildLayout extends CustomMultiChildLayout {
+  const _CustomMultiChildLayout({
+    required super.delegate,
+    required super.children,
+  });
+
+  @override
+  RenderCustomMultiChildLayoutBox createRenderObject(BuildContext context) {
+    return _RenderCustomMultiChildLayoutBox(delegate: delegate);
+  }
+}
+
+class _RenderCustomMultiChildLayoutBox extends RenderCustomMultiChildLayoutBox {
+  _RenderCustomMultiChildLayoutBox({
+    required super.delegate,
+  });
+
+  static RenderBox? _currentLayout;
+
+  @override
+  void performLayout() {
+    _currentLayout = this;
+    // Relax layout check - we need to be able to get transform to root
+    // during layout call, which may involve querying size of unrelated
+    // widgets.
+    invokeLayoutCallback((constraints) {
+      super.performLayout();
+    });
+    _currentLayout = null;
+  }
 }
