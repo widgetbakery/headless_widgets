@@ -181,6 +181,66 @@ void main() {
     expect(region2.isInside, true);
   });
 
+  testWidgetsFakeAsync('scrolling timer restarts', (tester, async) async {
+    final region1 = _MouseRegionState();
+    final region2 = _MouseRegionState();
+
+    const widget1 = Key('Widget1');
+    const widget2 = Key('Widget2');
+
+    await tester.pumpWidget(TestApp(
+      home: SingleChildScrollView(
+        child: Column(
+          children: [
+            _MouseRegion(
+              state: region1,
+              child: const SizedBox.square(key: widget1, dimension: 100),
+            ),
+            _MouseRegion(
+              state: region2,
+              child: const SizedBox.square(key: widget2, dimension: 100),
+            ),
+            const SizedBox(height: 10000),
+          ],
+        ),
+      ),
+    ));
+
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.byKey(widget1))));
+    expect(region1.isInside, true);
+    expect(region2.isInside, false);
+
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 100)));
+    await tester.pumpAndSettle();
+    expect(region1.isInside, false);
+    expect(region2.isInside, false);
+
+    async.elapse(const Duration(milliseconds: 50));
+    expect(region1.isInside, false);
+    expect(region2.isInside, false);
+
+    for (int i = 0; i < 5; ++i) {
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 1)));
+      await tester.pumpAndSettle();
+
+      async.elapse(const Duration(milliseconds: 50));
+      expect(region1.isInside, false);
+      expect(region2.isInside, false);
+
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 1)));
+      await tester.pumpAndSettle();
+
+      async.elapse(const Duration(milliseconds: 50));
+      expect(region1.isInside, false);
+      expect(region2.isInside, false);
+    }
+
+    async.elapse(const Duration(milliseconds: 100));
+    expect(region1.isInside, false);
+    expect(region2.isInside, true);
+  });
+
   testWidgets('capture works', (tester) async {
     final regionContainer = _MouseRegionState();
     final regionInner1 = _MouseRegionState();
