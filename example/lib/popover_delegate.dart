@@ -139,7 +139,7 @@ class SamplePopoverDelegate extends BasePopoverDelegate {
   ) {
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) {
+      onPointerUp: (_) {
         dismissPopover();
       },
     );
@@ -263,7 +263,7 @@ Path _makePopoverPath(
         path.lineTo(to.dx, to.dy);
         return;
       }
-      // Attachment position of notch in main axis extent
+      // Attachment position of call-out on main axis.
       double attachmentPosition;
       double crossAxisDistance;
       double mainAxisPositionMin;
