@@ -231,4 +231,91 @@ void main() {
     final popoverRect = tester.getRect(find.byKey(popoverKey));
     expect(popoverRect, const Rect.fromLTWH(60, 115, 80, 30));
   });
+
+  testWidgets('popover anchor in transform', (tester) async {
+    final key = GlobalKey<_PopoverWidgetState>();
+    const popoverKey = ValueKey('popover');
+
+    final popoverWidget = PopoverWidget(
+      key: key,
+      child: Container(),
+    );
+
+    await tester.pumpWidget(
+      TestApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Transform.scale(
+            scale: 1.5,
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: popoverWidget,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    key.currentState!._controller.showPopover(
+      const SizedBox(key: popoverKey, width: 80, height: 30),
+    );
+    await tester.pump();
+
+    final anchorRect = tester.getRect(find.byKey(key));
+    expect(
+      anchorRect,
+      const Rect.fromLTWH(-10, -10, 60, 60),
+    );
+
+    final popoverRect = tester.getRect(find.byKey(popoverKey));
+    expect(
+      popoverRect,
+      const Rect.fromLTWH(-10, 50, 80, 30),
+    );
+  });
+
+  testWidgets('application widget not filling entire screen', (tester) async {
+    final key = GlobalKey<_PopoverWidgetState>();
+    const popoverKey = ValueKey('popover');
+
+    final popoverWidget = PopoverWidget(
+      key: key,
+      child: Container(),
+    );
+
+    await tester.pumpWidget(
+      Column(
+        children: [
+          const SizedBox(height: 20),
+          Expanded(
+            child: TestApp(
+              home: Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(50),
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: popoverWidget,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    key.currentState!._controller.showPopover(
+      const SizedBox(key: popoverKey, width: 80, height: 30),
+    );
+    await tester.pump();
+
+    final anchorRect = tester.getRect(find.byKey(key));
+    expect(anchorRect, const Rect.fromLTWH(50, 70, 40, 40));
+
+    final popoverRect = tester.getRect(find.byKey(popoverKey));
+    expect(popoverRect, const Rect.fromLTWH(50, 110, 80, 30));
+  });
 }
