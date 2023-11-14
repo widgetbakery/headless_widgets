@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -8,6 +11,7 @@ class CaptureAwareMouseRegion extends StatefulWidget {
     this.onExit,
     this.onHover,
     this.cursor = MouseCursor.defer,
+    this.delayEventsWhenScrolling = true,
     this.opaque = true,
     this.hitTestBehavior,
     required this.child,
@@ -17,6 +21,7 @@ class CaptureAwareMouseRegion extends StatefulWidget {
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;
   final MouseCursor cursor;
+  final bool delayEventsWhenScrolling;
   final bool opaque;
   final HitTestBehavior? hitTestBehavior;
   final Widget child;
@@ -53,7 +58,11 @@ class _CaptureAwareMouseRegionState extends State<CaptureAwareMouseRegion> {
 
   void _captureOwnerDidChange() {
     _cachedCaptureByAnotherSubtree = null;
-    if (_pendingEnter != null && !_isMouseCapturedByAnotherSubtree()) {
+    _update();
+  }
+
+  void _update() {
+    if (_pendingEnter != null && !_shouldPreventNotifications()) {
       widget.onEnter?.call(_pendingEnter!);
       if (_pendingHover != null) {
         widget.onHover?.call(_pendingHover!);
@@ -66,6 +75,62 @@ class _CaptureAwareMouseRegionState extends State<CaptureAwareMouseRegion> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final scrollable = widget.delayEventsWhenScrolling ? Scrollable.maybeOf(context) : null;
+    _resetScrollPosition();
+    if (scrollable != null) {
+      _lastScrollPosition = scrollable.position;
+      _lastScrollPosition!.isScrollingNotifier.addListener(_scrollingDidChange);
+      _lastScrollPosition!.addListener(_scrollingDidChange);
+    }
+    if (_lastScrollPosition == null) {
+      _scrolling = false;
+    }
+  }
+
+  bool _scrolling = false;
+  ScrollPosition? _lastScrollPosition;
+  Timer? _scrollResetTimer;
+
+  void _updateScrolling(bool scrolling) {
+    if (_scrolling != scrolling) {
+      _scrolling = scrolling;
+      _update();
+    }
+  }
+
+  void _resetScrollPosition() {
+    final position = _lastScrollPosition;
+    if (position != null) {
+      position.isScrollingNotifier.removeListener(_scrollingDidChange);
+      position.removeListener(_scrollingDidChange);
+      _lastScrollPosition = null;
+    }
+    _scrollResetTimer?.cancel();
+    _scrollResetTimer = null;
+  }
+
+  void _scrollingDidChange() {
+    // macOS ends isScrolling when when lifting fingers from touchpad, which is
+    // nice, on other platforms we rely on a timeout.
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+      _updateScrolling(_lastScrollPosition!.isScrollingNotifier.value);
+    } else {
+      _updateScrolling(true);
+    }
+    _scrollResetTimer?.cancel();
+    if (_scrolling) {
+      _scrollResetTimer = Timer(const Duration(milliseconds: 100), () {
+        _scrollResetTimer = null;
+        _updateScrolling(false);
+      });
+    } else {
+      _scrollResetTimer = null;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     _captureOwner.addListener(_captureOwnerDidChange);
@@ -75,9 +140,14 @@ class _CaptureAwareMouseRegionState extends State<CaptureAwareMouseRegion> {
   void dispose() {
     super.dispose();
     _captureOwner.removeListener(_captureOwnerDidChange);
+    _resetScrollPosition();
   }
 
   bool? _cachedCaptureByAnotherSubtree;
+
+  bool _shouldPreventNotifications() {
+    return _isMouseCapturedByAnotherSubtree() || _scrolling;
+  }
 
   bool _isMouseCapturedByAnotherSubtree() {
     if (_cachedCaptureByAnotherSubtree != null) {
@@ -120,7 +190,7 @@ class _CaptureAwareMouseRegionState extends State<CaptureAwareMouseRegion> {
     if (_depth > 1) {
       return;
     }
-    if (_isMouseCapturedByAnotherSubtree()) {
+    if (_shouldPreventNotifications()) {
       _pendingEnter = event;
       return;
     }
@@ -128,7 +198,7 @@ class _CaptureAwareMouseRegionState extends State<CaptureAwareMouseRegion> {
   }
 
   void _onHover(PointerHoverEvent event) {
-    if (_isMouseCapturedByAnotherSubtree()) {
+    if (_shouldPreventNotifications()) {
       _pendingHover = event;
       return;
     }
@@ -149,12 +219,12 @@ class _CaptureAwareMouseRegionState extends State<CaptureAwareMouseRegion> {
 
   @override
   Widget build(BuildContext context) {
-    final mouseCaptured = _isMouseCapturedByAnotherSubtree();
+    final shouldPrevent = _shouldPreventNotifications();
     return MouseRegion(
       onEnter: _onEnter,
       onExit: _onExit,
       onHover: _onHover,
-      cursor: mouseCaptured ? MouseCursor.defer : widget.cursor,
+      cursor: shouldPrevent ? MouseCursor.defer : widget.cursor,
       opaque: widget.opaque,
       child: widget.child,
     );

@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:headless/headless.dart';
 
+import 'test_util.dart';
+
 class _PanDownToCapture extends StatefulWidget {
   const _PanDownToCapture({
     required this.child,
@@ -82,22 +84,20 @@ void main() {
                 _MouseRegion(
                   state: regionOuter1,
                   child: _PanDownToCapture(
-                      child: _MouseRegion(
-                          state: regionInner1,
-                          child: const SizedBox.square(
-                            key: widget1,
-                            dimension: 100,
-                          ))),
+                    child: _MouseRegion(
+                      state: regionInner1,
+                      child: const SizedBox.square(key: widget1, dimension: 100),
+                    ),
+                  ),
                 ),
                 _MouseRegion(
                   state: regionOuter2,
                   child: _PanDownToCapture(
-                      child: _MouseRegion(
-                          state: regionInner2,
-                          child: const SizedBox.square(
-                            key: widget2,
-                            dimension: 100,
-                          ))),
+                    child: _MouseRegion(
+                      state: regionInner2,
+                      child: const SizedBox.square(key: widget2, dimension: 100),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -135,6 +135,50 @@ void main() {
       expect(regionOuter2.isInside, true);
       expect(regionInner2.isInside, true);
     }
+  });
+
+  testWidgetsFakeAsync('scrolling delays event', (tester, async) async {
+    final region1 = _MouseRegionState();
+    final region2 = _MouseRegionState();
+
+    const widget1 = Key('Widget1');
+    const widget2 = Key('Widget2');
+
+    await tester.pumpWidget(TestApp(
+      home: SingleChildScrollView(
+        child: Column(
+          children: [
+            _MouseRegion(
+              state: region1,
+              child: const SizedBox.square(key: widget1, dimension: 100),
+            ),
+            _MouseRegion(
+              state: region2,
+              child: const SizedBox.square(key: widget2, dimension: 100),
+            ),
+            const SizedBox(height: 10000),
+          ],
+        ),
+      ),
+    ));
+
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.byKey(widget1))));
+    expect(region1.isInside, true);
+    expect(region2.isInside, false);
+
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 100)));
+    await tester.pumpAndSettle();
+    expect(region1.isInside, false);
+    expect(region2.isInside, false);
+
+    async.elapse(const Duration(milliseconds: 50));
+    expect(region1.isInside, false);
+    expect(region2.isInside, false);
+
+    async.elapse(const Duration(milliseconds: 50));
+    expect(region1.isInside, false);
+    expect(region2.isInside, true);
   });
 
   testWidgets('capture works', (tester) async {
