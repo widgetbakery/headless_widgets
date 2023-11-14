@@ -205,7 +205,7 @@ class _PopoverButtonState extends State<PopoverButton> {
       animationDuration: const Duration(milliseconds: 200),
       animationReverseDuration: const Duration(milliseconds: 150),
       child: SampleButton(
-        onPressedDown: () async {
+        onPressed: () async {
           await _controller.showPopover(_Popover(
             controller: _controller,
           ));
@@ -284,7 +284,7 @@ class MainApp extends StatelessWidget {
                 child: _ButtonRow(
                   children: [
                     PopoverButton(
-                      child: Text('Show Popover 1'),
+                      child: Text('Show Popover 1\nMulti line'),
                     ),
                     Spacer(),
                     PopoverButton(
