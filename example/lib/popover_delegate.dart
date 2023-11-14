@@ -6,26 +6,39 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/widgets.dart';
 import 'package:headless/headless.dart';
+import 'package:pixel_snap/pixel_snap.dart';
 
 class SamplePopoverDelegate extends BasePopoverDelegate {
   SamplePopoverDelegate({
     required super.attachments,
   }) : super(
-          calloutSize: 10,
-          popoverDistance: 12,
           calloutAnimationDuration: const Duration(milliseconds: 150),
         );
+
+  late PixelSnap _pixelSnap;
+
+  @override
+  double get calloutSize => _pixelSnap(10);
+
+  @override
+  double get popoverDistance => _pixelSnap(12);
 
   @override
   EdgeInsets getScreenInsets(EdgeInsets safeAreaInsets) {
     // Enforce minimum insets
-    const min = EdgeInsets.all(20);
+    final min = EdgeInsets.all(_pixelSnap(20));
     return EdgeInsets.fromLTRB(
       math.max(min.left, safeAreaInsets.left),
       math.max(min.top, safeAreaInsets.top),
       math.max(min.right, safeAreaInsets.right),
       math.max(min.bottom, safeAreaInsets.bottom),
     );
+  }
+
+  @override
+  Widget buildScaffold(BuildContext context, Widget child, Animation<double> animation) {
+    _pixelSnap = PixelSnap.of(context);
+    return super.buildScaffold(context, child, animation);
   }
 
   @override
@@ -44,6 +57,7 @@ class SamplePopoverDelegate extends BasePopoverDelegate {
       child: RepaintBoundary(
         child: CustomPaint(
           painter: _PopoverPainter(
+            pixelSnap: PixelSnap.of(context),
             geometry: geometry,
             getCalloutHeightFactor: calloutHeightFactor,
           ),
@@ -179,10 +193,12 @@ class _PopoverPainter extends CustomPainter {
   _PopoverPainter({
     required this.geometry,
     required this.getCalloutHeightFactor,
+    required this.pixelSnap,
   }) : super(repaint: geometry);
 
   final ValueListenable<PopoverGeometry?> geometry;
   final double Function(bool calloutVisible) getCalloutHeightFactor;
+  final PixelSnap pixelSnap;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -190,10 +206,16 @@ class _PopoverPainter extends CustomPainter {
     if (geometry == null) {
       return;
     }
+
+    late double heightFactor;
+
     final path = _makePopoverPath(
       size,
       geometry,
-      getCalloutHeightFactor,
+      (visible) {
+        heightFactor = getCalloutHeightFactor(visible);
+        return heightFactor;
+      },
     );
 
     // BlurStyle.outer doesn't seem to work with HTML renderer
@@ -219,13 +241,22 @@ class _PopoverPainter extends CustomPainter {
       canvas.restore();
     }
 
-    canvas.drawPath(
-      path,
-      Paint()
-        ..strokeWidth = 1
-        ..color = Colors.grey.shade400
-        ..style = PaintingStyle.stroke,
+    final innerPath = _makePopoverPath(
+      size,
+      geometry,
+      (_) => heightFactor,
+      rectAdjustment: EdgeInsets.all(pixelSnap(-1)),
+      radiusAdjustment: pixelSnap(-1),
+      calloutAdjustment: pixelSnap(-1),
     );
+
+    final fillPath = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addPath(path, Offset.zero)
+      ..addPath(innerPath, Offset.zero)
+      ..close();
+
+    canvas.drawPath(fillPath, Paint()..color = Colors.grey.shade400);
   }
 
   @override
@@ -249,15 +280,15 @@ extension on PopoverEdge {
   }
 }
 
-Path _makePopoverPath(
-  Size size,
-  PopoverGeometry geometry,
-  double Function(bool calloutVisible) getCalloutHeightFactor,
-) {
-  final rect = geometry.popover;
+Path _makePopoverPath(Size size, PopoverGeometry geometry,
+    double Function(bool calloutVisible) getCalloutHeightFactor,
+    {EdgeInsets rectAdjustment = EdgeInsets.zero,
+    double radiusAdjustment = 0,
+    double calloutAdjustment = 0}) {
+  final rect = rectAdjustment.inflateRect(geometry.popover);
   final path = Path();
   path.addCupertinoRRect(
-    RRect.fromRectAndRadius(rect, const Radius.circular(10)),
+    RRect.fromRectAndRadius(rect, Radius.circular(10 + radiusAdjustment)),
     lineCallback: (path, from, to, edge) {
       if (edge != geometry.attachment.getCalloutEdge()?.asCupertinoEdge) {
         path.lineTo(to.dx, to.dy);
@@ -308,7 +339,7 @@ Path _makePopoverPath(
         mainAxisSign = 1.0;
       }
 
-      final bool calloutVisible = crossAxisDistance == geometry.requestedDistance &&
+      final bool calloutVisible = (crossAxisDistance - geometry.requestedDistance).abs() < 0.001 &&
           mainAxisPositionMin <= attachmentPosition &&
           mainAxisPositionMax >= attachmentPosition;
 
@@ -322,8 +353,10 @@ Path _makePopoverPath(
 
       attachmentPosition = attachmentPosition.clamp(mainAxisPositionMin, mainAxisPositionMax);
 
-      final control1 = mainAxisSign * (calloutMainSizeHalf / 2.0);
-      final control2 = mainAxisSign * (calloutMainSizeHalf / 3.0);
+      final control1 =
+          mainAxisSign * (calloutMainSizeHalf / 2.0) - mainAxisSign * calloutAdjustment;
+      final control2 =
+          mainAxisSign * (calloutMainSizeHalf / 3.0) + mainAxisSign * calloutAdjustment;
 
       final calloutMainAxisStart = attachmentPosition - mainAxisSign * calloutMainSizeHalf;
       final calloutMainAxisEnd = attachmentPosition + mainAxisSign * calloutMainSizeHalf;

@@ -10,7 +10,11 @@ import 'package:pixel_snap/widgets.dart';
 import 'widgets.dart';
 
 void main() {
-  runApp(const MainApp());
+  Widget app = const MainApp();
+  if (!kIsWeb && kDebugMode) {
+    app = PixelSnapDebugBar(child: app);
+  }
+  runApp(app);
 }
 
 class MinimalApp extends StatelessWidget {
@@ -23,7 +27,7 @@ class MinimalApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final res = WidgetsApp(
+    return WidgetsApp(
       color: Colors.blue,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
@@ -37,8 +41,6 @@ class MinimalApp extends StatelessWidget {
         ),
       ),
     );
-    return res;
-    // return PixelSnapDebugBar(child: res);
   }
 }
 

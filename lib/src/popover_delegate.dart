@@ -7,8 +7,6 @@ import 'popover_geometry.dart';
 abstract class BasePopoverDelegate extends PopoverDelegate {
   BasePopoverDelegate({
     required this.attachments,
-    required this.calloutSize,
-    required this.popoverDistance,
     required this.calloutAnimationDuration,
   });
 
@@ -18,11 +16,11 @@ abstract class BasePopoverDelegate extends PopoverDelegate {
   final List<PopoverAttachment> attachments;
 
   /// Height of the popover call-out.
-  final double calloutSize;
+  double get calloutSize;
 
   /// Requested distance between the popover and anchor. This may not be honored
   /// if popover needs to be repositioned to fit on screen.
-  final double popoverDistance;
+  double get popoverDistance;
 
   /// Returns the insets that used when positioning popover on screen.
   EdgeInsets getScreenInsets(EdgeInsets safeAreaInsets) {
@@ -65,6 +63,7 @@ abstract class BasePopoverDelegate extends PopoverDelegate {
   //
 
   @override
+  @mustCallSuper
   Widget buildScaffold(
     BuildContext context,
     Widget child,

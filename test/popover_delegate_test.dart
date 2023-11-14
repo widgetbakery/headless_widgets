@@ -7,10 +7,16 @@ import 'test_util.dart';
 class TestDelegate extends BasePopoverDelegate {
   TestDelegate({
     required super.attachments,
-    required super.calloutSize,
-    required super.popoverDistance,
+    required this.calloutSize,
+    required this.popoverDistance,
     required super.calloutAnimationDuration,
   });
+
+  @override
+  final double calloutSize;
+
+  @override
+  final double popoverDistance;
 
   ValueNotifier<PopoverGeometry?>? _geometry;
 
