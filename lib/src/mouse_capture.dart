@@ -112,22 +112,29 @@ class _CaptureAwareMouseRegionState extends State<CaptureAwareMouseRegion> {
   }
 
   void _scrollingDidChange() {
-    // macOS ends isScrolling when when lifting fingers from touchpad, which is
-    // nice, on other platforms we rely on a timeout.
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
-      _updateScrolling(_lastScrollPosition!.isScrollingNotifier.value);
-    } else {
-      _updateScrolling(true);
-    }
-    _scrollResetTimer?.cancel();
-    if (_scrolling) {
-      _scrollResetTimer = Timer(const Duration(milliseconds: 100), () {
+    // Schedule at the end of frame because this might be called from
+    // ScrollPosition.applyNewDimensions, which is invoked during layout.
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!mounted) {
+        return;
+      }
+      // macOS ends isScrolling when when lifting fingers from touchpad, which is
+      // nice, on other platforms we rely on a timeout.
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+        _updateScrolling(_lastScrollPosition!.isScrollingNotifier.value);
+      } else {
+        _updateScrolling(true);
+      }
+      _scrollResetTimer?.cancel();
+      if (_scrolling) {
+        _scrollResetTimer = Timer(const Duration(milliseconds: 100), () {
+          _scrollResetTimer = null;
+          _updateScrolling(false);
+        });
+      } else {
         _scrollResetTimer = null;
-        _updateScrolling(false);
-      });
-    } else {
-      _scrollResetTimer = null;
-    }
+      }
+    });
   }
 
   @override
