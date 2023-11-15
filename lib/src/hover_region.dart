@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -97,6 +98,7 @@ class _HoverRegionState extends State<HoverRegion> {
   PointerHoverEvent? _pendingHover;
   PointerExitEvent? _pendingExit;
   int? _pendingExitPointer;
+  int? _ignoredEnterPointer;
 
   bool _scrolling = false;
 
@@ -180,8 +182,50 @@ class _HoverRegionState extends State<HoverRegion> {
     }
   }
 
+  static bool? _runningInTester;
+
+  // Flutter tester does not synthesize hover events on mouse up,
+  // unlike native platforms.
+  static bool _needSynthetizeHoverOnUp() {
+    if (kIsWeb) {
+      _runningInTester = false;
+    } else {
+      _runningInTester ??= Platform.environment.containsKey('FLUTTER_TEST');
+    }
+    return _runningInTester!;
+  }
+
   void _onGlobalRoute(PointerEvent event) {
     if (event is PointerUpEvent) {
+      if (event.pointer == _ignoredEnterPointer) {
+        _ignoredEnterPointer = null;
+        if (_needSynthetizeHoverOnUp()) {
+          _onHover(PointerHoverEvent(
+            viewId: event.viewId,
+            timeStamp: event.timeStamp,
+            kind: event.kind,
+            pointer: 0,
+            device: event.device,
+            position: event.position,
+            delta: event.delta,
+            buttons: event.buttons,
+            obscured: event.obscured,
+            pressureMin: event.pressureMin,
+            pressureMax: event.pressureMax,
+            distance: event.distance,
+            distanceMax: event.distanceMax,
+            size: event.size,
+            radiusMajor: event.radiusMajor,
+            radiusMinor: event.radiusMinor,
+            radiusMin: event.radiusMin,
+            radiusMax: event.radiusMax,
+            orientation: event.orientation,
+            tilt: event.tilt,
+            synthesized: event.synthesized,
+            embedderId: event.embedderId,
+          ));
+        }
+      }
       if (event.pointer == _pendingExitPointer) {
         assert(_pendingExit != null);
         assert(_inside);
@@ -206,12 +250,24 @@ class _HoverRegionState extends State<HoverRegion> {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_onGlobalRoute);
   }
 
+  // Workaround for iOS with UIApplicationSupportsIndirectInputEvents set to true.
+  // This seems to be sending nested PointerEnterEvents and PointerExitEvents when
+  // pressing touch-pad.
+  int _depth = 0;
+
   void _onEnter(PointerEnterEvent event) {
+    ++_depth;
+    if (_depth > 1) {
+      return;
+    }
+
     if (_pendingExitPointer == event.pointer) {
       _pendingExitPointer = null;
       _pendingExit = null;
     }
-    if (!_inside && !event.down) {
+    if (!_inside && event.down) {
+      _ignoredEnterPointer = event.pointer;
+    } else if (!_inside) {
       if (_preventNotifications) {
         _pendingEnter = event;
       } else {
@@ -258,6 +314,15 @@ class _HoverRegionState extends State<HoverRegion> {
   }
 
   void _onExit(PointerExitEvent event) {
+    if (_ignoredEnterPointer == event.pointer) {
+      _ignoredEnterPointer = null;
+    }
+
+    --_depth;
+    if (_depth > 0) {
+      return;
+    }
+
     if (_inside) {
       if (event.down) {
         _pendingExitPointer = event.pointer;

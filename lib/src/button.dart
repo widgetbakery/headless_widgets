@@ -416,11 +416,20 @@ class _ButtonState extends State<Button> {
 
   @override
   Widget build(BuildContext context) {
+    bool noButtonInGroupTracked() {
+      if (_buttonGroup == null) {
+        return true;
+      }
+      return _buttonGroup!._buttons.every(
+        (element) => !element._tracked,
+      );
+    }
+
     final state = ButtonState(
       selected: widget.selected,
       enabled: _enabled,
       focused: _enabled && focusNode.hasFocus,
-      hovered: _enabled && _hovered && !_tracked,
+      hovered: _enabled && _hovered && !_tracked && noButtonInGroupTracked(),
       pressed: _enabled && (_pressed || _waitingOnFuture),
       tracked: _enabled && _tracked,
     );
