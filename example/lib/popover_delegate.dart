@@ -42,6 +42,17 @@ class SamplePopoverDelegate extends BasePopoverDelegate {
   }
 
   @override
+  Offset computePosition(Rect bounds, EdgeInsets safeAreaInsets, Rect anchor, Size popoverSize) {
+    final position = super.computePosition(
+      bounds,
+      safeAreaInsets,
+      anchor,
+      popoverSize,
+    );
+    return position.pixelSnap(_pixelSnap);
+  }
+
+  @override
   Widget buildPopover(
     BuildContext context,
     child,
@@ -218,9 +229,13 @@ class _PopoverPainter extends CustomPainter {
       },
     );
 
-    // BlurStyle.outer doesn't seem to work with HTML renderer
-    // so we clip manually.
-    if (getCurrentRenderer() == FlutterRenderer.html) {
+    // BlurStyle.outer doesn't seem to work with HTML renderer and impeller.
+
+    final brokenBlurStyleOuter = getCurrentRenderer() == FlutterRenderer.html ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android;
+
+    if (brokenBlurStyleOuter) {
       final clip = Path();
       clip.fillType = PathFillType.evenOdd;
       clip.addRect(const EdgeInsets.all(20).inflateRect(Offset.zero & size));
@@ -234,10 +249,13 @@ class _PopoverPainter extends CustomPainter {
       Paint()
         ..color = Colors.black.withOpacity(0.2)
         ..style = PaintingStyle.fill
-        ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 5),
+        ..maskFilter = MaskFilter.blur(
+          brokenBlurStyleOuter ? BlurStyle.normal : BlurStyle.outer,
+          5,
+        ),
     );
 
-    if (getCurrentRenderer() == FlutterRenderer.html) {
+    if (brokenBlurStyleOuter) {
       canvas.restore();
     }
 
