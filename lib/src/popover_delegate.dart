@@ -134,6 +134,7 @@ abstract class BasePopoverDelegate extends PopoverDelegate {
   final _geometry = _GeometryNotifier(null);
 
   @override
+  @mustCallSuper
   BoxConstraints computeConstraints(
     Rect bounds,
     EdgeInsets safeAreaInsets,
@@ -146,6 +147,7 @@ abstract class BasePopoverDelegate extends PopoverDelegate {
   }
 
   @override
+  @mustCallSuper
   Offset computePosition(
     Rect bounds,
     EdgeInsets safeAreaInsets,
