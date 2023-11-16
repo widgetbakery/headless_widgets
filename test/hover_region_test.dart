@@ -240,11 +240,11 @@ void main() {
 
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, 100)));
     await tester.pumpAndSettle();
-    expect(region1.isInside, false);
+    expect(region1.isInside, true);
     expect(region2.isInside, false);
 
     async.elapse(const Duration(milliseconds: 50));
-    expect(region1.isInside, false);
+    expect(region1.isInside, true);
     expect(region2.isInside, false);
 
     async.elapse(const Duration(milliseconds: 50));
@@ -284,11 +284,11 @@ void main() {
 
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, 100)));
     await tester.pumpAndSettle();
-    expect(region1.isInside, false);
+    expect(region1.isInside, true);
     expect(region2.isInside, false);
 
     async.elapse(const Duration(milliseconds: 50));
-    expect(region1.isInside, false);
+    expect(region1.isInside, true);
     expect(region2.isInside, false);
 
     for (int i = 0; i < 5; ++i) {
@@ -296,14 +296,14 @@ void main() {
       await tester.pumpAndSettle();
 
       async.elapse(const Duration(milliseconds: 50));
-      expect(region1.isInside, false);
+      expect(region1.isInside, true);
       expect(region2.isInside, false);
 
       await tester.sendEventToBinding(pointer.scroll(const Offset(0, 1)));
       await tester.pumpAndSettle();
 
       async.elapse(const Duration(milliseconds: 50));
-      expect(region1.isInside, false);
+      expect(region1.isInside, true);
       expect(region2.isInside, false);
     }
 

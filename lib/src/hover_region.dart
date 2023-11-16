@@ -117,17 +117,24 @@ class _HoverRegionState extends State<HoverRegion> {
   bool get _preventNotifications => _scrolling;
 
   void _flush() {
-    if (_pendingEnter != null && !_preventNotifications) {
-      widget.onEnter?.call(_pendingEnter!);
-      _inside = true;
-      if (_pendingHover != null) {
-        widget.onHover?.call(_pendingHover!);
+    if (!_preventNotifications) {
+      assert(_pendingEnter == null || _pendingExit == null);
+      if (_pendingEnter != null) {
+        widget.onEnter?.call(_pendingEnter!);
+        _inside = true;
+        if (_pendingHover != null) {
+          widget.onHover?.call(_pendingHover!);
+        }
+        _pendingEnter = null;
+        _pendingHover = null;
+      } else if (_pendingExit != null) {
+        widget.onExit?.call(_pendingExit!);
+        _inside = false;
+        _pendingExit = null;
       }
-      _pendingEnter = null;
-      _pendingHover = null;
+      // Refresh mouse cursor
+      setState(() {});
     }
-    // Refresh mouse cursor
-    setState(() {});
   }
 
   void _resetScrollPosition() {
@@ -261,10 +268,8 @@ class _HoverRegionState extends State<HoverRegion> {
       return;
     }
 
-    if (_pendingExitPointer == event.pointer) {
-      _pendingExitPointer = null;
-      _pendingExit = null;
-    }
+    _pendingExitPointer = null;
+    _pendingExit = null;
     if (!_inside && event.down) {
       _ignoredEnterPointer = event.pointer;
     } else if (!_inside) {
@@ -326,6 +331,9 @@ class _HoverRegionState extends State<HoverRegion> {
     if (_inside) {
       if (event.down) {
         _pendingExitPointer = event.pointer;
+        _pendingExit = event;
+      } else if (_preventNotifications) {
+        _pendingExitPointer = null;
         _pendingExit = event;
       } else {
         _inside = false;
