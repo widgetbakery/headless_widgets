@@ -1,8 +1,7 @@
 name: headless_widgets
-description: "A new Flutter package project."
+description: "A set of widgets that implement robust logic for common controls, without making any assumption about the presentation."
 version: 0.0.1
-#homepage:
-deploy_to: none
+homepage: https://github.com/widgetbakery/headless_widgets
 
 environment:
   sdk: '>=3.1.0 <4.0.0'
