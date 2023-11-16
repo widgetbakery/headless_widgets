@@ -313,7 +313,7 @@ void main() {
   });
 
   testWidgetsFakeAsync(
-    'hover updated when moving mouse during overscroll return',
+    'hover updated on hover event during scrolling',
     (tester, async) async {
       final region1 = _MouseRegionState();
       final region2 = _MouseRegionState();
@@ -346,13 +346,31 @@ void main() {
       final pointer = TestPointer(2, PointerDeviceKind.trackpad);
       await tester.sendEventToBinding(pointer.panZoomStart(tester.getCenter(find.byKey(widget1))));
       await tester.sendEventToBinding(
-          pointer.panZoomUpdate(tester.getCenter(find.byKey(widget1)), pan: const Offset(0, 200)));
+        pointer.panZoomUpdate(
+          tester.getCenter(find.byKey(widget1)),
+          pan: const Offset(0, -20),
+          timeStamp: const Duration(milliseconds: 10),
+        ),
+      );
+      await tester.sendEventToBinding(
+        pointer.panZoomUpdate(
+          tester.getCenter(find.byKey(widget1)),
+          pan: const Offset(0, -40),
+          timeStamp: const Duration(milliseconds: 14),
+        ),
+      );
+
       await tester.sendEventToBinding(pointer.panZoomEnd());
+
+      // Start scrolling
+      await tester.pump(const Duration(milliseconds: 10));
 
       expect(region1.isInside, true);
       expect(region2.isInside, false);
 
+      // This should not be ignored.
       await tester.sendEventToBinding(pointerHover.hover(tester.getCenter(find.byKey(widget2))));
+
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(region1.isInside, false);

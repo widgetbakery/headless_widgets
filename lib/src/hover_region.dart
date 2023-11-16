@@ -104,21 +104,6 @@ class _HoverRegionState extends State<HoverRegion> {
 
   ScrollPosition? _lastScrollPosition;
 
-  bool get isReturningFromOverscroll {
-    final position = _lastScrollPosition;
-    if (position != null) {
-      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-      final activity = position.activity;
-      return activity is BallisticScrollActivity &&
-          (position.pixels < position.minScrollExtent ||
-              position.pixels > position.maxScrollExtent);
-    } else {
-      return false;
-    }
-  }
-
-  bool _mouseMovedDuringOverscroll = false;
-
   Timer? _scrollResetTimer;
 
   bool get _inside => __inside;
@@ -179,16 +164,12 @@ class _HoverRegionState extends State<HoverRegion> {
       }
       final position = _lastScrollPosition!;
 
-      if (!isReturningFromOverscroll) {
-        _mouseMovedDuringOverscroll = false;
-      }
-
       // macOS ends isScrolling when when lifting fingers from touchpad, which is
       // nice, on other platforms we rely on a timeout.
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
-        _updateScrolling(position.isScrollingNotifier.value && !_mouseMovedDuringOverscroll);
+        _updateScrolling(position.isScrollingNotifier.value);
       } else {
-        _updateScrolling(!_mouseMovedDuringOverscroll);
+        _updateScrolling(true);
       }
       _scrollResetTimer?.cancel();
       if (_scrolling) {
@@ -231,8 +212,8 @@ class _HoverRegionState extends State<HoverRegion> {
   }
 
   void _onGlobalRoute(PointerEvent event) {
-    if (event is PointerHoverEvent && isReturningFromOverscroll) {
-      _mouseMovedDuringOverscroll = true;
+    if (event is PointerHoverEvent) {
+      _updateScrolling(false);
     }
     if (event is PointerUpEvent) {
       if (event.pointer == _ignoredEnterPointer) {
