@@ -311,4 +311,53 @@ void main() {
     expect(region1.isInside, false);
     expect(region2.isInside, true);
   });
+
+  testWidgetsFakeAsync(
+    'hover updated when moving mouse during overscroll return',
+    (tester, async) async {
+      final region1 = _MouseRegionState();
+      final region2 = _MouseRegionState();
+
+      const widget1 = Key('Widget1');
+      const widget2 = Key('Widget2');
+
+      await tester.pumpWidget(TestApp(
+        home: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 200),
+              _MouseRegion(
+                state: region1,
+                child: const SizedBox.square(key: widget1, dimension: 100),
+              ),
+              _MouseRegion(
+                state: region2,
+                child: const SizedBox.square(key: widget2, dimension: 100),
+              ),
+              const SizedBox(height: 10000),
+            ],
+          ),
+        ),
+      ));
+
+      final pointerHover = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(pointerHover.hover(tester.getCenter(find.byKey(widget1))));
+
+      final pointer = TestPointer(2, PointerDeviceKind.trackpad);
+      await tester.sendEventToBinding(pointer.panZoomStart(tester.getCenter(find.byKey(widget1))));
+      await tester.sendEventToBinding(
+          pointer.panZoomUpdate(tester.getCenter(find.byKey(widget1)), pan: const Offset(0, 200)));
+      await tester.sendEventToBinding(pointer.panZoomEnd());
+
+      expect(region1.isInside, true);
+      expect(region2.isInside, false);
+
+      await tester.sendEventToBinding(pointerHover.hover(tester.getCenter(find.byKey(widget2))));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(region1.isInside, false);
+      expect(region2.isInside, true);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
 }
