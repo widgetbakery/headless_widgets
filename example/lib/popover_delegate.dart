@@ -5,7 +5,7 @@ import 'package:cupertino_rrect/cupertino_rrect.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/widgets.dart';
-import 'package:headless/headless.dart';
+import 'package:headless_widgets/headless_widgets.dart';
 import 'package:pixel_snap/pixel_snap.dart';
 
 class SamplePopoverDelegate extends BasePopoverDelegate {

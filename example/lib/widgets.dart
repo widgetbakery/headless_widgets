@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cupertino_rrect/cupertino_rrect.dart';
 import 'package:flutter/material.dart' show Colors;
-import 'package:headless/headless.dart';
+import 'package:headless_widgets/headless_widgets.dart';
 import 'package:pixel_snap/widgets.dart';
 
 class FocusIndicator extends StatelessWidget {

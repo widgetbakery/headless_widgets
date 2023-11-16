@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:headless/src/control.dart';
 
+import 'control.dart';
 import 'hover_region.dart';
 
 typedef ButtonState = ControlState;

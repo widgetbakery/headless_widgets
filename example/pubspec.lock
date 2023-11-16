@@ -75,7 +75,7 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  headless:
+  headless_widgets:
     dependency: "direct main"
     description:
       path: ".."

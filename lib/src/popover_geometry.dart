@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:headless/src/util.dart';
+
+import 'util.dart';
 
 enum PopoverEdge {
   top,

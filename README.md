@@ -11,12 +11,20 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+A set of widgets that implement logic for common controls, without making
+any assumption about the presentation.
+
+This package focuses on correctness and flexibility, it can be used to back
+custom design systems and custom widget sets.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+Currently implemented widgets:
+
+- Button
+- Popover
+
+This package also implements mouse capture
 
 ## Getting started
 
