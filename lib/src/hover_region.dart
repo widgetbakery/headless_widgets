@@ -350,6 +350,7 @@ class _HoverRegionState extends State<HoverRegion> {
       onEnter: _onEnter,
       onExit: _onExit,
       onHover: _onHover,
+      hitTestBehavior: widget.hitTestBehavior,
       cursor: _preventNotifications ? MouseCursor.defer : widget.cursor,
       opaque: widget.opaque,
       child: widget.child,
