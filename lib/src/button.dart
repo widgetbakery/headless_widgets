@@ -27,6 +27,7 @@ class Button extends StatefulWidget {
     this.focusNode,
     this.tapToFocus = false,
     this.keyUpTimeout,
+    this.pressOnEnterKey = false,
     this.selected = SelectionState.off,
     this.cursor = SystemMouseCursors.basic,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
@@ -65,6 +66,12 @@ class Button extends StatefulWidget {
 
   final MouseCursor cursor;
   final SelectionState selected;
+
+  /// Whether keyboard enter key should trigger [onPressed] callback.
+  /// on MacOS it is customary for button to be only submitted when pressing
+  /// space. On Windows and Linux, pressing enter key on focused button should
+  /// trigger [onPressed] callback as well.
+  final bool pressOnEnterKey;
 
   /// Optional callback to be called when key event is received.
   final KeyEventResult? Function(KeyEvent)? onKeyEvent;
@@ -267,18 +274,19 @@ class _ButtonState extends State<Button> {
     if (widgetResult != null) {
       return widgetResult;
     }
-    if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.space) {
+    bool isSubmitKey = event.logicalKey == LogicalKeyboardKey.space ||
+        (widget.pressOnEnterKey &&
+            (event.logicalKey == LogicalKeyboardKey.enter ||
+                event.logicalKey == LogicalKeyboardKey.numpadEnter));
+
+    if (isSubmitKey) {
+      if (event is KeyDownEvent) {
         _update(keyPressed: true);
         return KeyEventResult.handled;
-      }
-    } else if (event is KeyUpEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.space) {
+      } else if (event is KeyUpEvent) {
         _update(keyPressed: false);
         return KeyEventResult.handled;
-      }
-    } else if (event is KeyRepeatEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.space) {
+      } else if (event is KeyRepeatEvent) {
         return KeyEventResult.handled;
       }
     }
