@@ -121,7 +121,15 @@ class _HoverRegionState extends State<HoverRegion> {
 
   Timer? _scrollResetTimer;
 
-  bool _inside = false;
+  bool get _inside => __inside;
+  bool __inside = false;
+  set _inside(bool v) {
+    if (v != __inside) {
+      setState(() {
+        __inside = v;
+      });
+    }
+  }
 
   void _updateScrolling(bool scrolling) {
     if (_scrolling != scrolling) {
@@ -148,8 +156,6 @@ class _HoverRegionState extends State<HoverRegion> {
         _inside = false;
         _pendingExit = null;
       }
-      // Refresh mouse cursor
-      setState(() {});
     }
   }
 
@@ -376,7 +382,7 @@ class _HoverRegionState extends State<HoverRegion> {
       onExit: _onExit,
       onHover: _onHover,
       hitTestBehavior: widget.hitTestBehavior,
-      cursor: _preventNotifications ? MouseCursor.defer : widget.cursor,
+      cursor: _preventNotifications || !_inside ? MouseCursor.defer : widget.cursor,
       opaque: widget.opaque,
       child: widget.child,
     );
