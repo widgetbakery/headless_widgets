@@ -1,37 +1,9 @@
-import 'dart:ui';
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:headless/headless.dart';
 
 import 'test_util.dart';
-
-class _PanDownToCapture extends StatefulWidget {
-  const _PanDownToCapture({
-    required this.child,
-  });
-
-  final Widget child;
-
-  @override
-  State<StatefulWidget> createState() => _PanDownToCaptureState();
-}
-
-class _PanDownToCaptureState extends State<_PanDownToCapture> with MouseCapture {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onPanDown: (_) {
-        captureMouse();
-      },
-      onPanEnd: (_) {
-        releaseMouse();
-      },
-      child: widget.child,
-    );
-  }
-}
 
 class _MouseRegionState {
   bool isInside = false;
@@ -48,7 +20,7 @@ class _MouseRegion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CaptureAwareMouseRegion(
+    return HoverRegion(
       onEnter: (_) {
         state.isInside = true;
       },
@@ -83,20 +55,16 @@ void main() {
               children: [
                 _MouseRegion(
                   state: regionOuter1,
-                  child: _PanDownToCapture(
-                    child: _MouseRegion(
-                      state: regionInner1,
-                      child: const SizedBox.square(key: widget1, dimension: 100),
-                    ),
+                  child: _MouseRegion(
+                    state: regionInner1,
+                    child: const SizedBox.square(key: widget1, dimension: 100),
                   ),
                 ),
                 _MouseRegion(
                   state: regionOuter2,
-                  child: _PanDownToCapture(
-                    child: _MouseRegion(
-                      state: regionInner2,
-                      child: const SizedBox.square(key: widget2, dimension: 100),
-                    ),
+                  child: _MouseRegion(
+                    state: regionInner2,
+                    child: const SizedBox.square(key: widget2, dimension: 100),
                   ),
                 ),
               ],
@@ -129,6 +97,109 @@ void main() {
 
       await gesture.moveTo(tester.getCenter(find.byKey(widget2)));
 
+      expect(regionContainer.isInside, true);
+      expect(regionOuter1.isInside, false);
+      expect(regionInner1.isInside, false);
+      expect(regionOuter2.isInside, true);
+      expect(regionInner2.isInside, true);
+    }
+  });
+
+  testWidgets('capture-like behavior works', (tester) async {
+    final regionContainer = _MouseRegionState();
+    final regionInner1 = _MouseRegionState();
+    final regionOuter1 = _MouseRegionState();
+    final regionInner2 = _MouseRegionState();
+    final regionOuter2 = _MouseRegionState();
+
+    const widget1 = Key('Widget1');
+    const widget2 = Key('Widget2');
+
+    await tester.pumpWidget(
+      Align(
+        alignment: Alignment.topLeft,
+        child: _MouseRegion(
+          state: regionContainer,
+          child: Padding(
+            padding: const EdgeInsets.all(100),
+            child: Row(
+              textDirection: TextDirection.ltr,
+              children: [
+                _MouseRegion(
+                  state: regionOuter1,
+                  child: _MouseRegion(
+                    state: regionInner1,
+                    child: const SizedBox.square(
+                      key: widget1,
+                      dimension: 100,
+                    ),
+                  ),
+                ),
+                _MouseRegion(
+                  state: regionOuter2,
+                  child: _MouseRegion(
+                    state: regionInner2,
+                    child: const SizedBox.square(
+                      key: widget2,
+                      dimension: 100,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(regionContainer.isInside, false);
+    expect(regionOuter1.isInside, false);
+    expect(regionInner1.isInside, false);
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    for (int i = 0; i < 2; ++i) {
+      // hover first, then down
+      await gesture.moveTo(tester.getCenter(find.byKey(widget1)));
+      await gesture.down(tester.getCenter(find.byKey(widget1)));
+
+      expect(regionContainer.isInside, true);
+      expect(regionOuter1.isInside, true);
+      expect(regionInner1.isInside, true);
+      expect(regionOuter2.isInside, false);
+      expect(regionInner2.isInside, false);
+
+      // When moving to second while buttons is pressed hover is preserved.
+      await gesture.moveTo(tester.getCenter(find.byKey(widget2)));
+      expect(regionContainer.isInside, true);
+      expect(regionOuter1.isInside, true);
+      expect(regionInner1.isInside, true);
+      expect(regionOuter2.isInside, false);
+      expect(regionInner2.isInside, false);
+
+      await gesture.moveTo(tester.getCenter(find.byKey(widget1)));
+      expect(regionContainer.isInside, true);
+      expect(regionOuter1.isInside, true);
+      expect(regionInner1.isInside, true);
+      expect(regionOuter2.isInside, false);
+      expect(regionInner2.isInside, false);
+
+      // Second widget again.
+      await gesture.moveTo(tester.getCenter(find.byKey(widget2)));
+      expect(regionContainer.isInside, true);
+      expect(regionOuter1.isInside, true);
+      expect(regionInner1.isInside, true);
+      expect(regionOuter2.isInside, false);
+      expect(regionInner2.isInside, false);
+
+      // Release - should restore hover on second widget.
+      await gesture.up();
+
+      // When releasing button there is normally a hover event immediately, but that
+      // does not seem to be the case with Widget tester.
+      await gesture.moveBy(Offset.zero);
       expect(regionContainer.isInside, true);
       expect(regionOuter1.isInside, false);
       expect(regionInner1.isInside, false);
@@ -239,104 +310,5 @@ void main() {
     async.elapse(const Duration(milliseconds: 100));
     expect(region1.isInside, false);
     expect(region2.isInside, true);
-  });
-
-  testWidgets('capture works', (tester) async {
-    final regionContainer = _MouseRegionState();
-    final regionInner1 = _MouseRegionState();
-    final regionOuter1 = _MouseRegionState();
-    final regionInner2 = _MouseRegionState();
-    final regionOuter2 = _MouseRegionState();
-
-    const widget1 = Key('Widget1');
-    const widget2 = Key('Widget2');
-
-    await tester.pumpWidget(
-      Align(
-        alignment: Alignment.topLeft,
-        child: _MouseRegion(
-          state: regionContainer,
-          child: Padding(
-            padding: const EdgeInsets.all(100),
-            child: Row(
-              textDirection: TextDirection.ltr,
-              children: [
-                _MouseRegion(
-                  state: regionOuter1,
-                  child: _PanDownToCapture(
-                      child: _MouseRegion(
-                          state: regionInner1,
-                          child: const SizedBox.square(
-                            key: widget1,
-                            dimension: 100,
-                          ))),
-                ),
-                _MouseRegion(
-                  state: regionOuter2,
-                  child: _PanDownToCapture(
-                      child: _MouseRegion(
-                          state: regionInner2,
-                          child: const SizedBox.square(
-                            key: widget2,
-                            dimension: 100,
-                          ))),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(regionContainer.isInside, false);
-    expect(regionOuter1.isInside, false);
-    expect(regionInner1.isInside, false);
-
-    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
-
-    for (int i = 0; i < 2; ++i) {
-      // This should trigger mouse capture - next move will not change hovered state.
-      await gesture.down(tester.getCenter(find.byKey(widget1)));
-
-      expect(regionContainer.isInside, true);
-      expect(regionOuter1.isInside, true);
-      expect(regionInner1.isInside, true);
-      expect(regionOuter2.isInside, false);
-      expect(regionInner2.isInside, false);
-
-      // When moving to second widget only container is hovered.
-      await gesture.moveTo(tester.getCenter(find.byKey(widget2)));
-      expect(regionContainer.isInside, true);
-      expect(regionOuter1.isInside, false);
-      expect(regionInner1.isInside, false);
-      expect(regionOuter2.isInside, false);
-      expect(regionInner2.isInside, false);
-
-      // move back - should restore hover on first widget.
-      await gesture.moveTo(tester.getCenter(find.byKey(widget1)));
-      expect(regionContainer.isInside, true);
-      expect(regionOuter1.isInside, true);
-      expect(regionInner1.isInside, true);
-      expect(regionOuter2.isInside, false);
-      expect(regionInner2.isInside, false);
-
-      // Second widget again.
-      await gesture.moveTo(tester.getCenter(find.byKey(widget2)));
-      expect(regionContainer.isInside, true);
-      expect(regionOuter1.isInside, false);
-      expect(regionInner1.isInside, false);
-      expect(regionOuter2.isInside, false);
-      expect(regionInner2.isInside, false);
-
-      // Release - should restore hover on second widget.
-      await gesture.up();
-      expect(regionContainer.isInside, true);
-      expect(regionOuter1.isInside, false);
-      expect(regionInner1.isInside, false);
-      expect(regionOuter2.isInside, true);
-      expect(regionInner2.isInside, true);
-    }
   });
 }

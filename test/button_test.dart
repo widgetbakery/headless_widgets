@@ -847,6 +847,7 @@ void main() {
         for (int i = 0; i < 2; ++i) {
           pressed1 = pressed2 = pressed3 = false;
 
+          await gesture.moveTo(tester.getCenter(find.byKey(button1)));
           await gesture.down(tester.getCenter(find.byKey(button1)));
           await tester.pump();
 

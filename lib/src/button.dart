@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:headless/src/control.dart';
 
-import 'mouse_capture.dart';
+import 'hover_region.dart';
 
 typedef ButtonState = ControlState;
 
@@ -121,7 +121,7 @@ class ButtonGroup extends StatefulWidget {
 //
 //
 
-class _ButtonState extends State<Button> with MouseCapture {
+class _ButtonState extends State<Button> {
   late FocusNode focusNode;
 
   @override
@@ -325,9 +325,6 @@ class _ButtonState extends State<Button> with MouseCapture {
 
   void _onPanDown(DragDownDetails details, PointerDeviceKind kind) {
     _update(inside: true, pointerPressed: true);
-    if (kind == PointerDeviceKind.mouse) {
-      captureMouse();
-    }
     if (widget.tapToFocus) {
       // This is an oversight in how traversal is implemented in Flutter
       // currently. Manually changing focus doesn't reset traversal history,
@@ -352,12 +349,10 @@ class _ButtonState extends State<Button> with MouseCapture {
 
   void _onPanEnd(DragEndDetails _) {
     _update(pointerPressed: false, inside: false);
-    releaseMouse();
   }
 
   void _onPanCancel() {
     _update(pointerPressed: false, inside: false, cancelled: true);
-    releaseMouse();
   }
 
   _PanGestureRecognizer? _panGestureRecognizer;
@@ -421,11 +416,20 @@ class _ButtonState extends State<Button> with MouseCapture {
 
   @override
   Widget build(BuildContext context) {
+    bool noButtonInGroupTracked() {
+      if (_buttonGroup == null) {
+        return true;
+      }
+      return _buttonGroup!._buttons.every(
+        (element) => !element._tracked,
+      );
+    }
+
     final state = ButtonState(
       selected: widget.selected,
       enabled: _enabled,
       focused: _enabled && focusNode.hasFocus,
-      hovered: _enabled && _hovered && !_tracked,
+      hovered: _enabled && _hovered && !_tracked && noButtonInGroupTracked(),
       pressed: _enabled && (_pressed || _waitingOnFuture),
       tracked: _enabled && _tracked,
     );
@@ -439,7 +443,7 @@ class _ButtonState extends State<Button> with MouseCapture {
         onFocusChange: (_) {
           _focusDidChange();
         },
-        child: CaptureAwareMouseRegion(
+        child: HoverRegion(
           cursor: _enabled ? widget.cursor : MouseCursor.defer,
           onEnter: (event) {
             setState(() {
