@@ -49,7 +49,8 @@ class _FocusPainter extends CustomPainter {
     if (focus > 0) {
       double opacity = focus;
 
-      final paint = Paint()..color = Colors.deepOrange.shade200.withOpacity(opacity);
+      final paint = Paint()
+        ..color = Colors.deepOrange.shade200.withOpacity(opacity);
 
       final radius = const Radius.circular(8).pixelSnap(pixelSnap);
       var rect = (Offset.zero & size).pixelSnap(pixelSnap).inflate(2);
@@ -104,7 +105,9 @@ class SampleButton extends StatelessWidget {
     };
     final backgroundColor = switch (state) {
       ButtonState(pressed: true) => Colors.blue.shade400,
-      ButtonState(hovered: true) || ButtonState(tracked: true) => Colors.blue.shade50,
+      ButtonState(hovered: true) ||
+      ButtonState(tracked: true) =>
+        Colors.blue.shade50,
       _ => Colors.white,
     };
     final textColor = switch (state) {
@@ -137,7 +140,8 @@ class SampleButton extends StatelessWidget {
           // ],
           shape: CupertinoRectangleBorder(
             // borderRadius: BorderRadius.circular(6),
-            borderRadius: const BorderRadius.all(Radius.circular(6.0)).pixelSnap(ps),
+            borderRadius:
+                const BorderRadius.all(Radius.circular(6.0)).pixelSnap(ps),
             side: BorderSide(color: borderColor, width: 1).pixelSnap(ps),
           ),
           shadows: [

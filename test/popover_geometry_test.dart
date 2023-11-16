@@ -167,7 +167,8 @@ void main() {
   group('PopoverGeometry', () {
     test('getAlignment returns correct Alignment', () {
       const geometry = PopoverGeometry(
-        attachment: PopoverAttachment(anchor: Alignment.center, popover: Alignment.center),
+        attachment: PopoverAttachment(
+            anchor: Alignment.center, popover: Alignment.center),
         requestedDistance: 10.0,
         anchor: Rect.fromLTWH(0, 0, 50, 50),
         popover: Rect.fromLTWH(0, 60, 100, 100),

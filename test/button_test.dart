@@ -70,7 +70,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         for (int i = 0; i < 2; ++i) {
           pressed = false;
@@ -128,7 +129,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         for (int i = 0; i < 2; ++i) {
           pressedDown = false;
@@ -192,7 +194,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         for (int i = 0; i < 2; ++i) {
           pressedDown = false;
@@ -261,7 +264,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         for (int i = 0; i < 2; ++i) {
           pressedDown = false;
@@ -331,7 +335,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         for (int i = 0; i < 2; ++i) {
           pressed = false;
@@ -406,7 +411,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         for (int i = 0; i < 2; ++i) {
           pressed = false;
@@ -451,7 +457,8 @@ void main() {
       ),
     );
 
-    testWidgets('button remains pressed while callback future completes', (tester) async {
+    testWidgets('button remains pressed while callback future completes',
+        (tester) async {
       const button = ValueKey('button');
       bool pressed;
       late ControlState state;
@@ -471,7 +478,8 @@ void main() {
         ),
       );
 
-      final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+      final gesture =
+          await tester.createPlatformGesture(initialLocation: Offset.zero);
 
       for (int i = 0; i < 2; ++i) {
         pressed = false;
@@ -555,7 +563,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         for (int i = 0; i < 2; ++i) {
           pressed1 = false;
@@ -642,7 +651,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         final finder = find.byKey(button);
 
@@ -725,7 +735,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
 
         final finder = find.byKey(button);
 
@@ -805,7 +816,10 @@ void main() {
         await tester.pumpWidget(
           Center(
             child: ButtonGroup(
-              allowedDeviceKind: const {PointerDeviceKind.mouse, PointerDeviceKind.touch},
+              allowedDeviceKind: const {
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.touch
+              },
               child: Row(
                 textDirection: TextDirection.ltr,
                 mainAxisSize: MainAxisSize.min,
@@ -843,7 +857,8 @@ void main() {
           ),
         );
 
-        final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+        final gesture =
+            await tester.createPlatformGesture(initialLocation: Offset.zero);
         for (int i = 0; i < 2; ++i) {
           pressed1 = pressed2 = pressed3 = false;
 
@@ -918,7 +933,10 @@ void main() {
       await tester.pumpWidget(
         Center(
           child: ButtonGroup(
-            allowedDeviceKind: const {PointerDeviceKind.mouse, PointerDeviceKind.touch},
+            allowedDeviceKind: const {
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.touch
+            },
             child: Row(
               textDirection: TextDirection.ltr,
               mainAxisSize: MainAxisSize.min,
@@ -944,7 +962,8 @@ void main() {
         ),
       );
 
-      final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+      final gesture =
+          await tester.createPlatformGesture(initialLocation: Offset.zero);
       for (int i = 0; i < 2; ++i) {
         pressed1 = false;
 
@@ -988,7 +1007,10 @@ void main() {
       await tester.pumpWidget(
         Center(
           child: ButtonGroup(
-            allowedDeviceKind: const {PointerDeviceKind.mouse, PointerDeviceKind.touch},
+            allowedDeviceKind: const {
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.touch
+            },
             child: Row(
               textDirection: TextDirection.ltr,
               mainAxisSize: MainAxisSize.min,
@@ -1014,7 +1036,8 @@ void main() {
         ),
       );
 
-      final gesture = await tester.createPlatformGesture(initialLocation: Offset.zero);
+      final gesture =
+          await tester.createPlatformGesture(initialLocation: Offset.zero);
       for (int i = 0; i < 2; ++i) {
         pressed1 = false;
 
@@ -1148,7 +1171,8 @@ void main() {
       }
     });
 
-    testWidgets('key down after onPressedDown completes keeps button presed', (tester) async {
+    testWidgets('key down after onPressedDown completes keeps button presed',
+        (tester) async {
       const button = ValueKey('button');
       late ControlState state;
       bool pressedDown;
@@ -1202,7 +1226,8 @@ void main() {
       }
     });
 
-    testWidgetsFakeAsync('pressDownDelay works with space', (tester, async) async {
+    testWidgetsFakeAsync('pressDownDelay works with space',
+        (tester, async) async {
       const button = ValueKey('button');
       late ControlState state;
       bool pressed;
@@ -1402,7 +1427,8 @@ void main() {
       }
     });
 
-    testWidgetsFakeAsync('keyUpTimeout is ignored with onPressedDown', (tester, async) async {
+    testWidgetsFakeAsync('keyUpTimeout is ignored with onPressedDown',
+        (tester, async) async {
       const button = ValueKey('button');
       late ControlState state;
       bool pressed;
@@ -1515,7 +1541,8 @@ void main() {
       expect(state3, ControlState(enabled: true, focused: true));
     });
 
-    testWidgets('disabling/enabling button updates focusability', (tester) async {
+    testWidgets('disabling/enabling button updates focusability',
+        (tester) async {
       late ControlState state1;
       late ControlState state2;
       late ControlState state3;
@@ -1641,7 +1668,8 @@ void main() {
       expect(pressed, isFalse);
     });
 
-    testWidgetsFakeAsync('unfocusing armed button does not submit', (tester, async) async {
+    testWidgetsFakeAsync('unfocusing armed button does not submit',
+        (tester, async) async {
       late ControlState state1;
       late ControlState state2;
       bool pressed = false;

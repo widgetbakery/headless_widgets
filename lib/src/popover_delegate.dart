@@ -113,7 +113,8 @@ abstract class BasePopoverDelegate extends PopoverDelegate {
     } else {
       if (visible && _calloutAnimation!.status != AnimationStatus.forward) {
         _calloutAnimation!.forward();
-      } else if (!visible && _calloutAnimation!.status != AnimationStatus.reverse) {
+      } else if (!visible &&
+          _calloutAnimation!.status != AnimationStatus.reverse) {
         _calloutAnimation!.reverse();
       }
     }
@@ -212,13 +213,15 @@ PopoverAttachment _bestMatchingAttachment({
   PopoverAttachment? bestAttachment;
 
   for (final attachment in attachments) {
-    final offset = attachment.getPopoverOffset(anchorRect, popoverSize, distance);
+    final offset =
+        attachment.getPopoverOffset(anchorRect, popoverSize, distance);
     final popoverRect = offset & popoverSize;
     final correction = _fitRectInBounds(bounds: bounds, rect: popoverRect);
     if (correction == Offset.zero) {
       return attachment;
     }
-    if (bestCorrection == null || bestCorrection.distanceSquared > correction.distanceSquared) {
+    if (bestCorrection == null ||
+        bestCorrection.distanceSquared > correction.distanceSquared) {
       bestCorrection = correction;
       bestAttachment = attachment;
     }

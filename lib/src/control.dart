@@ -39,13 +39,16 @@ class ControlState {
   /// Returns the state of the nearest control above this context, or null if
   /// there is no control in the tree above this context.
   static ControlState? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ControlStateProvider>()?.state;
+    return context
+        .dependOnInheritedWidgetOfExactType<ControlStateProvider>()
+        ?.state;
   }
 
   /// Returns the state of the nearest control above this context.
   static ControlState of(BuildContext context) {
     final state = ControlState.maybeOf(context);
-    assert(state != null, 'ButtonState.of() called with a context that does not contain a Button.');
+    assert(state != null,
+        'ButtonState.of() called with a context that does not contain a Button.');
     return state!;
   }
 

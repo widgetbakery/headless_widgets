@@ -186,7 +186,8 @@ class _HoverRegionState extends State<HoverRegion> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final scrollable = widget.delayEventsWhenScrolling ? Scrollable.maybeOf(context) : null;
+    final scrollable =
+        widget.delayEventsWhenScrolling ? Scrollable.maybeOf(context) : null;
     _resetScrollPosition();
     if (scrollable != null) {
       _lastScrollPosition = scrollable.position;
@@ -363,7 +364,8 @@ class _HoverRegionState extends State<HoverRegion> {
       onExit: _onExit,
       onHover: _onHover,
       hitTestBehavior: widget.hitTestBehavior,
-      cursor: _preventNotifications || !_inside ? MouseCursor.defer : widget.cursor,
+      cursor:
+          _preventNotifications || !_inside ? MouseCursor.defer : widget.cursor,
       opaque: widget.opaque,
       child: widget.child,
     );

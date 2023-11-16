@@ -78,7 +78,8 @@ class _PopoverWidgetState extends State<PopoverWidget> {
 }
 
 void main() {
-  testWidgets('PopoverDelegate choses correct attachment and preserves it', (tester) async {
+  testWidgets('PopoverDelegate choses correct attachment and preserves it',
+      (tester) async {
     final key = GlobalKey<_PopoverWidgetState>();
 
     Future<void> pumpWidget(double x, double y) async {
@@ -111,7 +112,8 @@ void main() {
     }
 
     await pumpWidget(0, 400);
-    key.currentState!._controller.showPopover(const SizedBox(width: 400, height: 400));
+    key.currentState!._controller
+        .showPopover(const SizedBox(width: 400, height: 400));
     await tester.pumpAndSettle();
 
     final delegate = key.currentState!._currentDelegate!;

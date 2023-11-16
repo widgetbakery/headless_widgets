@@ -31,10 +31,13 @@ class MinimalApp extends StatelessWidget {
       color: Colors.blue,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
-            settings: settings, pageBuilder: (context, _, __) => builder(context));
+            settings: settings,
+            pageBuilder: (context, _, __) => builder(context));
       },
       home: DefaultTextStyle(
-        style: Typography.material2018(platform: defaultTargetPlatform).englishLike.bodyMedium!,
+        style: Typography.material2018(platform: defaultTargetPlatform)
+            .englishLike
+            .bodyMedium!,
         child: ColoredBox(
           color: Colors.grey.shade100,
           child: child,
@@ -143,7 +146,8 @@ class _PopoverState extends State<_Popover> {
       child: SafeArea(
         child: AnimatedPadding(
           duration: const Duration(milliseconds: 200),
-          padding: expanded ? const EdgeInsets.all(50) : const EdgeInsets.all(20),
+          padding:
+              expanded ? const EdgeInsets.all(50) : const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -168,7 +172,9 @@ class _PopoverState extends State<_Popover> {
                         expanded = !expanded;
                       });
                     },
-                    child: expanded ? const Text('Collapse') : const Text('Expand'),
+                    child: expanded
+                        ? const Text('Collapse')
+                        : const Text('Expand'),
                   ),
                 ],
               )
@@ -200,9 +206,12 @@ class _PopoverButtonState extends State<PopoverButton> {
     return PopoverAnchor(
       controller: _controller,
       delegate: () => SamplePopoverDelegate(attachments: [
-        const PopoverAttachment(anchor: Alignment.centerLeft, popover: Alignment.centerRight),
-        const PopoverAttachment(anchor: Alignment.bottomCenter, popover: Alignment.topCenter),
-        const PopoverAttachment(anchor: Alignment.topCenter, popover: Alignment.bottomCenter),
+        const PopoverAttachment(
+            anchor: Alignment.centerLeft, popover: Alignment.centerRight),
+        const PopoverAttachment(
+            anchor: Alignment.bottomCenter, popover: Alignment.topCenter),
+        const PopoverAttachment(
+            anchor: Alignment.topCenter, popover: Alignment.bottomCenter),
       ]),
       animationDuration: const Duration(milliseconds: 200),
       animationReverseDuration: const Duration(milliseconds: 150),
@@ -235,7 +244,8 @@ class MainApp extends StatelessWidget {
             children: [
               _Section(
                   title: 'Regular Button',
-                  description: 'Requires tab to focus. Default behavior on most platforms.',
+                  description:
+                      'Requires tab to focus. Default behavior on most platforms.',
                   child: _ButtonRow(
                     children: [
                       SampleButton(

@@ -36,13 +36,22 @@ class SamplePopoverDelegate extends BasePopoverDelegate {
   }
 
   @override
-  Widget buildScaffold(BuildContext context, Widget child, Animation<double> animation) {
+  Widget buildScaffold(
+    BuildContext context,
+    Widget child,
+    Animation<double> animation,
+  ) {
     _pixelSnap = PixelSnap.of(context);
     return super.buildScaffold(context, child, animation);
   }
 
   @override
-  Offset computePosition(Rect bounds, EdgeInsets safeAreaInsets, Rect anchor, Size popoverSize) {
+  Offset computePosition(
+    Rect bounds,
+    EdgeInsets safeAreaInsets,
+    Rect anchor,
+    Size popoverSize,
+  ) {
     final position = super.computePosition(
       bounds,
       safeAreaInsets,
@@ -82,7 +91,10 @@ class SamplePopoverDelegate extends BasePopoverDelegate {
             getCalloutHeightFactor: calloutHeightFactor,
           ),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10 * blurFactor, sigmaY: 10 * blurFactor),
+            filter: ImageFilter.blur(
+              sigmaX: 10 * blurFactor,
+              sigmaY: 10 * blurFactor,
+            ),
             child: child,
           ),
         );
@@ -324,13 +336,13 @@ Path _makePopoverPath(Size size, PopoverGeometry geometry,
       double mainAxisSign;
 
       if (edge.isHorizontal) {
-        attachmentPosition =
-            geometry.anchor.left + geometry.anchor.width * geometry.attachment.anchor.percentX;
+        attachmentPosition = geometry.anchor.left +
+            geometry.anchor.width * geometry.attachment.anchor.percentX;
         mainAxisPositionMin = math.min(from.dx, to.dx) + calloutMainSizeHalf;
         mainAxisPositionMax = math.max(from.dx, to.dx) - calloutMainSizeHalf;
       } else {
-        attachmentPosition =
-            geometry.anchor.top + geometry.anchor.height * geometry.attachment.anchor.percentY;
+        attachmentPosition = geometry.anchor.top +
+            geometry.anchor.height * geometry.attachment.anchor.percentY;
         mainAxisPositionMin = math.min(from.dy, to.dy) + calloutMainSizeHalf;
         mainAxisPositionMax = math.max(from.dy, to.dy) - calloutMainSizeHalf;
       }
@@ -357,9 +369,10 @@ Path _makePopoverPath(Size size, PopoverGeometry geometry,
         mainAxisSign = 1.0;
       }
 
-      final bool calloutVisible = (crossAxisDistance - geometry.requestedDistance).abs() < 0.001 &&
-          mainAxisPositionMin <= attachmentPosition &&
-          mainAxisPositionMax >= attachmentPosition;
+      final bool calloutVisible =
+          (crossAxisDistance - geometry.requestedDistance).abs() < 0.001 &&
+              mainAxisPositionMin <= attachmentPosition &&
+              mainAxisPositionMax >= attachmentPosition;
 
       final heightFactor = getCalloutHeightFactor(calloutVisible);
       calloutCrossAxisSize *= heightFactor;
@@ -369,15 +382,18 @@ Path _makePopoverPath(Size size, PopoverGeometry geometry,
         return;
       }
 
-      attachmentPosition = attachmentPosition.clamp(mainAxisPositionMin, mainAxisPositionMax);
+      attachmentPosition =
+          attachmentPosition.clamp(mainAxisPositionMin, mainAxisPositionMax);
 
-      final control1 =
-          mainAxisSign * (calloutMainSizeHalf / 2.0) - mainAxisSign * calloutAdjustment;
-      final control2 =
-          mainAxisSign * (calloutMainSizeHalf / 3.0) + mainAxisSign * calloutAdjustment;
+      final control1 = mainAxisSign * (calloutMainSizeHalf / 2.0) -
+          mainAxisSign * calloutAdjustment;
+      final control2 = mainAxisSign * (calloutMainSizeHalf / 3.0) +
+          mainAxisSign * calloutAdjustment;
 
-      final calloutMainAxisStart = attachmentPosition - mainAxisSign * calloutMainSizeHalf;
-      final calloutMainAxisEnd = attachmentPosition + mainAxisSign * calloutMainSizeHalf;
+      final calloutMainAxisStart =
+          attachmentPosition - mainAxisSign * calloutMainSizeHalf;
+      final calloutMainAxisEnd =
+          attachmentPosition + mainAxisSign * calloutMainSizeHalf;
 
       void lineTo(double x, double y) {
         if (edge.isHorizontal) {
@@ -387,7 +403,8 @@ Path _makePopoverPath(Size size, PopoverGeometry geometry,
         }
       }
 
-      void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) {
+      void cubicTo(
+          double x1, double y1, double x2, double y2, double x3, double y3) {
         if (edge.isHorizontal) {
           path.cubicTo(x1, y1, x2, y2, x3, y3);
         } else {

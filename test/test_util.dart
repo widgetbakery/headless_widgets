@@ -6,7 +6,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
-typedef TesterFakeAsyncCallback = Future<void> Function(WidgetTester widgetTester, FakeAsync async);
+typedef TesterFakeAsyncCallback = Future<void> Function(
+  WidgetTester widgetTester,
+  FakeAsync async,
+);
 
 @isTest
 void testWidgetsFakeAsync(
@@ -57,10 +60,13 @@ class TestApp extends StatelessWidget {
       color: const Color(0x00000000),
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
-            settings: settings, pageBuilder: (context, _, __) => builder(context));
+            settings: settings,
+            pageBuilder: (context, _, __) => builder(context));
       },
       home: DefaultTextStyle(
-        style: Typography.material2018(platform: defaultTargetPlatform).englishLike.bodyMedium!,
+        style: Typography.material2018(platform: defaultTargetPlatform)
+            .englishLike
+            .bodyMedium!,
         child: home,
       ),
     );
