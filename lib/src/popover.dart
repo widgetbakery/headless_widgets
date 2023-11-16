@@ -113,7 +113,10 @@ class _SizeMonitor extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    covariant RenderObject renderObject,
+  ) {
     (renderObject as _SizeMonitorRenderBox).onSizeChanged = onSizeChanged;
   }
 }
@@ -130,7 +133,8 @@ class _SizeMonitorRenderBox extends RenderProxyBox {
   }
 }
 
-class _PopoverAnchorState extends State<PopoverAnchor> with TickerProviderStateMixin {
+class _PopoverAnchorState extends State<PopoverAnchor>
+    with TickerProviderStateMixin {
   final _overlayPortalController = OverlayPortalController();
 
   Widget _popoverChild = const SizedBox();
@@ -250,7 +254,8 @@ class _PopoverAnchorState extends State<PopoverAnchor> with TickerProviderStateM
             },
             child: FocusTraversalGroup(
               policy: ReadingOrderTraversalPolicy(
-                requestFocusCallback: (node, {alignment, alignmentPolicy, curve, duration}) {
+                requestFocusCallback: (node,
+                    {alignment, alignmentPolicy, curve, duration}) {
                   // Buggy flutter will find scrollable in element tree that isn't part
                   // of the render tree :-/
                   node.requestFocus();
@@ -344,7 +349,8 @@ class _PopoverLayout extends MultiChildLayoutDelegate {
       final bounds = Offset.zero & boundsSize;
       final renderObject = anchor.findRenderObject() as RenderBox;
       final anchorToWindow = renderObject.getTransformTo(null);
-      final windowToUs = _RenderCustomMultiChildLayoutBox._currentLayout!.getTransformTo(null)
+      final windowToUs = _RenderCustomMultiChildLayoutBox._currentLayout!
+          .getTransformTo(null)
         ..invert();
       final anchorRect = (Offset.zero & anchorSize());
       final transformed = MatrixUtils.transformRect(

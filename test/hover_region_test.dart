@@ -234,11 +234,15 @@ void main() {
     ));
 
     final pointer = TestPointer(1, PointerDeviceKind.mouse);
-    await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.byKey(widget1))));
+    await tester.sendEventToBinding(
+      pointer.hover(tester.getCenter(find.byKey(widget1))),
+    );
     expect(region1.isInside, true);
     expect(region2.isInside, false);
 
-    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 100)));
+    await tester.sendEventToBinding(
+      pointer.scroll(const Offset(0, 100)),
+    );
     await tester.pumpAndSettle();
     expect(region1.isInside, true);
     expect(region2.isInside, false);
@@ -278,7 +282,9 @@ void main() {
     ));
 
     final pointer = TestPointer(1, PointerDeviceKind.mouse);
-    await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.byKey(widget1))));
+    await tester.sendEventToBinding(
+      pointer.hover(tester.getCenter(find.byKey(widget1))),
+    );
     expect(region1.isInside, true);
     expect(region2.isInside, false);
 
@@ -341,10 +347,14 @@ void main() {
       ));
 
       final pointerHover = TestPointer(1, PointerDeviceKind.mouse);
-      await tester.sendEventToBinding(pointerHover.hover(tester.getCenter(find.byKey(widget1))));
+      await tester.sendEventToBinding(
+        pointerHover.hover(tester.getCenter(find.byKey(widget1))),
+      );
 
       final pointer = TestPointer(2, PointerDeviceKind.trackpad);
-      await tester.sendEventToBinding(pointer.panZoomStart(tester.getCenter(find.byKey(widget1))));
+      await tester.sendEventToBinding(
+        pointer.panZoomStart(tester.getCenter(find.byKey(widget1))),
+      );
       await tester.sendEventToBinding(
         pointer.panZoomUpdate(
           tester.getCenter(find.byKey(widget1)),
@@ -369,7 +379,9 @@ void main() {
       expect(region2.isInside, false);
 
       // This should not be ignored.
-      await tester.sendEventToBinding(pointerHover.hover(tester.getCenter(find.byKey(widget2))));
+      await tester.sendEventToBinding(
+        pointerHover.hover(tester.getCenter(find.byKey(widget2))),
+      );
 
       await tester.pump(const Duration(milliseconds: 50));
 

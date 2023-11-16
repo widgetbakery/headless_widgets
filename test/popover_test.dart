@@ -13,23 +13,40 @@ class TestDelegate extends PopoverDelegate {
   final calls = <_DelegateCall>[];
 
   @override
-  Widget buildScaffold(BuildContext context, Widget child, Animation<double> animation) {
+  Widget buildScaffold(
+    BuildContext context,
+    Widget child,
+    Animation<double> animation,
+  ) {
     calls.add(_DelegateCall.buildScaffold);
     return child;
   }
 
   @override
-  Widget buildVeil(BuildContext context, Animation<double> animation, VoidCallback dismissPopover) {
+  Widget buildVeil(
+    BuildContext context,
+    Animation<double> animation,
+    VoidCallback dismissPopover,
+  ) {
     return Container();
   }
 
   @override
-  BoxConstraints computeConstraints(Rect bounds, EdgeInsets safeAreaInsets, Rect anchor) {
+  BoxConstraints computeConstraints(
+    Rect bounds,
+    EdgeInsets safeAreaInsets,
+    Rect anchor,
+  ) {
     return BoxConstraints.loose(safeAreaInsets.deflateRect(bounds).size);
   }
 
   @override
-  Offset computePosition(Rect bounds, EdgeInsets safeAreaInsets, Rect anchor, Size popoverSize) {
+  Offset computePosition(
+    Rect bounds,
+    EdgeInsets safeAreaInsets,
+    Rect anchor,
+    Size popoverSize,
+  ) {
     calls.add(_DelegateCall.computePosition);
     return anchor.bottomLeft;
   }

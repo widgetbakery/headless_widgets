@@ -17,7 +17,7 @@ jobs:
         run: flutter pub get
         working-directory: ./example
       - name: Check format
-        run: dart format --line-length 100 . --output=none --set-exit-if-changed
+        run: dart format . --output=none --set-exit-if-changed
         working-directory: ./example
       - name: Analyze
         run: flutter analyze

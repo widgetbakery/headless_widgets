@@ -221,7 +221,11 @@ class _ButtonState extends State<Button> {
       }
     }
 
-    if (pressedBefore && !_keyPressed && !_tracked && !_waitingOnFuture && !cancelled) {
+    if (pressedBefore &&
+        !_keyPressed &&
+        !_tracked &&
+        !_waitingOnFuture &&
+        !cancelled) {
       if (!_didFireLongPress) {
         _onPressed();
       }
@@ -376,28 +380,34 @@ class _ButtonState extends State<Button> {
   }
 
   Map<Type, GestureRecognizerFactory> _buildGestures() {
-    int currentPointer() => _panGestureRecognizer!._lastPointerDownEvent!.pointer;
-    PointerDeviceKind currentDeviceKind() => _panGestureRecognizer!._lastPointerDownEvent!.kind;
+    int currentPointer() =>
+        _panGestureRecognizer!._lastPointerDownEvent!.pointer;
+    PointerDeviceKind currentDeviceKind() =>
+        _panGestureRecognizer!._lastPointerDownEvent!.kind;
     return {
-      TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+      TapGestureRecognizer:
+          GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(),
         (instance) {
           instance.onTapUp = _onTapUp;
         },
       ),
-      _PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<_PanGestureRecognizer>(
-          () => _PanGestureRecognizer(), (instance) {
+      _PanGestureRecognizer:
+          GestureRecognizerFactoryWithHandlers<_PanGestureRecognizer>(
+              () => _PanGestureRecognizer(), (instance) {
         _panGestureRecognizer = instance;
         instance.onDown = (details) {
           if (_buttonGroup != null) {
-            _buttonGroup!._onPanDown(currentPointer(), currentDeviceKind(), details);
+            _buttonGroup!
+                ._onPanDown(currentPointer(), currentDeviceKind(), details);
           } else {
             _onPanDown(details, currentDeviceKind());
           }
         };
         instance.onUpdate = (details) {
           if (_buttonGroup != null) {
-            _buttonGroup!._onPanUpdate(currentPointer(), currentDeviceKind(), details);
+            _buttonGroup!
+                ._onPanUpdate(currentPointer(), currentDeviceKind(), details);
           } else {
             _onPanUpdate(details, currentDeviceKind());
           }
@@ -527,7 +537,11 @@ class _ButtonGroupState extends State<ButtonGroup> {
     return MatrixUtils.transformPoint(transform, globalPosition);
   }
 
-  void _onPanDown(int pointer, PointerDeviceKind deviceKind, DragDownDetails details) {
+  void _onPanDown(
+    int pointer,
+    PointerDeviceKind deviceKind,
+    DragDownDetails details,
+  ) {
     assert(!_pointerToButton.containsKey(pointer));
     final button = buttonForOffset(details.globalPosition);
     if (button != null) {
@@ -540,7 +554,11 @@ class _ButtonGroupState extends State<ButtonGroup> {
     }
   }
 
-  void _onPanUpdate(int pointer, PointerDeviceKind deviceKind, DragUpdateDetails details) {
+  void _onPanUpdate(
+    int pointer,
+    PointerDeviceKind deviceKind,
+    DragUpdateDetails details,
+  ) {
     final button = widget.allowedDeviceKind.contains(deviceKind)
         ? buttonForOffset(details.globalPosition) ?? _pointerToButton[pointer]
         : _pointerToButton[pointer];
@@ -555,7 +573,10 @@ class _ButtonGroupState extends State<ButtonGroup> {
       _pointerToButton[pointer] = button;
       widget.onActiveButtonChanged?.call();
       button._onPanDown(
-        DragDownDetails(globalPosition: details.globalPosition, localPosition: localPosition),
+        DragDownDetails(
+          globalPosition: details.globalPosition,
+          localPosition: localPosition,
+        ),
         deviceKind,
       );
     }
