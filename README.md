@@ -11,37 +11,21 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-A set of widgets that implement logic for common controls, without making
+A set of widgets that implement robust logic for common controls, without making
 any assumption about the presentation.
 
-This package focuses on correctness and flexibility, it can be used to back
+This package focuses on correctness and flexibility, it is meant to back
 custom design systems and custom widget sets.
 
 ## Features
 
 Currently implemented widgets:
 
-- Button
-- Popover
+- [Button](lib/src/button.dart)
+- [Popover](lib/src/popover.dart)
 
-This package also implements mouse capture
+This package also includes [HoverRegion](lib/src/hover_region.dart) widget which is a drop-in replacement for `MouseRegion` that supports mouse-capture like behavior and delaying hover events during scrolling.
 
-## Getting started
+## Example
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
-```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+Available in the [example](example) directory and [online](https://widgetbakery.github.io/headless_widgets/).
