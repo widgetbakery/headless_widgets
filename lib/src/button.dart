@@ -462,14 +462,10 @@ class _ButtonState extends State<Button> {
         child: HoverRegion(
           cursor: _enabled ? widget.cursor : MouseCursor.defer,
           onEnter: (event) {
-            setState(() {
-              _hovered = true;
-            });
+            _update(hovered: true);
           },
           onExit: (event) {
-            setState(() {
-              _hovered = false;
-            });
+            _update(hovered: false);
           },
           child: RawGestureDetector(
             behavior: widget.hitTestBehavior,
