@@ -93,6 +93,104 @@ class HoverRegion extends StatefulWidget {
   State<StatefulWidget> createState() => _HoverRegionState();
 }
 
+class _HoverRegionManager {
+  static final instance = _HoverRegionManager._();
+
+  void attachToScrollPosition(
+      ScrollPosition position, _HoverRegionState region) {
+    final entry = _positionToEntry.putIfAbsent(
+      position,
+      () => _HoverRegionManagerEntry(position),
+    );
+    assert(!entry._regions.contains(region));
+    entry._regions.add(region);
+  }
+
+  void detachFromScrollPosition(
+      ScrollPosition position, _HoverRegionState region) {
+    final entry = _positionToEntry[position]!;
+    entry._regions.remove(region);
+    if (entry._regions.isEmpty) {
+      _positionToEntry.remove(position);
+      entry.dispose();
+    }
+  }
+
+  void registerForGlobalRoute(_HoverRegionState region) {
+    _entryList.add(region);
+  }
+
+  void unregisterForGlobalRoute(_HoverRegionState region) {
+    _entryList.remove(region);
+  }
+
+  final _positionToEntry = <ScrollPosition, _HoverRegionManagerEntry>{};
+  final _entryList = <_HoverRegionState>[];
+
+  void _onGlobalRoute(PointerEvent event) {
+    if (event is PointerHoverEvent || event is PointerUpEvent) {
+      for (final state in _entryList) {
+        state._onGlobalRoute(event);
+      }
+    }
+  }
+
+  _HoverRegionManager._() {
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_onGlobalRoute);
+  }
+}
+
+class _HoverRegionManagerEntry {
+  _HoverRegionManagerEntry(this.position) {
+    position.isScrollingNotifier.addListener(_scrollingDidChange);
+    position.addListener(_scrollingDidChange);
+  }
+
+  void dispose() {
+    position.isScrollingNotifier.removeListener(_scrollingDidChange);
+    position.removeListener(_scrollingDidChange);
+
+    _scrollResetTimer?.cancel();
+    _scrollResetTimer = null;
+  }
+
+  void _scrollingDidChange() {
+    // Schedule at the end of frame because this might be called from
+    // ScrollPosition.applyNewDimensions, which is invoked during layout.
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // macOS ends isScrolling when when lifting fingers from touchpad, which is
+      // nice, on other platforms we rely on a timeout.
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+        _updateScrolling(position.isScrollingNotifier.value);
+      } else {
+        _updateScrolling(true);
+      }
+      _scrollResetTimer?.cancel();
+      if (_scrolling) {
+        _scrollResetTimer = Timer(const Duration(milliseconds: 100), () {
+          _scrollResetTimer = null;
+          _updateScrolling(false);
+        });
+      } else {
+        _scrollResetTimer = null;
+      }
+    });
+  }
+
+  void _updateScrolling(bool scrolling) {
+    _scrolling = scrolling;
+    for (final region in _regions) {
+      region._updateScrolling(scrolling);
+    }
+  }
+
+  Timer? _scrollResetTimer;
+
+  bool _scrolling = false;
+  final ScrollPosition position;
+  final _regions = <_HoverRegionState>[];
+}
+
 class _HoverRegionState extends State<HoverRegion> {
   PointerEnterEvent? _pendingEnter;
   PointerHoverEvent? _pendingHover;
@@ -103,8 +201,6 @@ class _HoverRegionState extends State<HoverRegion> {
   bool _scrolling = false;
 
   ScrollPosition? _lastScrollPosition;
-
-  Timer? _scrollResetTimer;
 
   bool get _inside => __inside;
   bool __inside = false;
@@ -117,6 +213,9 @@ class _HoverRegionState extends State<HoverRegion> {
   }
 
   void _updateScrolling(bool scrolling) {
+    if (!mounted) {
+      return;
+    }
     if (_scrolling != scrolling) {
       _scrolling = scrolling;
       _flush();
@@ -144,56 +243,24 @@ class _HoverRegionState extends State<HoverRegion> {
     }
   }
 
-  void _resetScrollPosition() {
-    final position = _lastScrollPosition;
-    if (position != null) {
-      position.isScrollingNotifier.removeListener(_scrollingDidChange);
-      position.removeListener(_scrollingDidChange);
-      _lastScrollPosition = null;
-    }
-    _scrollResetTimer?.cancel();
-    _scrollResetTimer = null;
-  }
-
-  void _scrollingDidChange() {
-    // Schedule at the end of frame because this might be called from
-    // ScrollPosition.applyNewDimensions, which is invoked during layout.
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!mounted) {
-        return;
-      }
-      final position = _lastScrollPosition!;
-
-      // macOS ends isScrolling when when lifting fingers from touchpad, which is
-      // nice, on other platforms we rely on a timeout.
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
-        _updateScrolling(position.isScrollingNotifier.value);
-      } else {
-        _updateScrolling(true);
-      }
-      _scrollResetTimer?.cancel();
-      if (_scrolling) {
-        _scrollResetTimer = Timer(const Duration(milliseconds: 100), () {
-          _scrollResetTimer = null;
-          _updateScrolling(false);
-        });
-      } else {
-        _scrollResetTimer = null;
-      }
-    });
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final scrollable =
         widget.delayEventsWhenScrolling ? Scrollable.maybeOf(context) : null;
-    _resetScrollPosition();
-    if (scrollable != null) {
-      _lastScrollPosition = scrollable.position;
-      _lastScrollPosition!.isScrollingNotifier.addListener(_scrollingDidChange);
-      _lastScrollPosition!.addListener(_scrollingDidChange);
+
+    final position = scrollable?.position;
+    if (position != _lastScrollPosition) {
+      if (_lastScrollPosition != null) {
+        _HoverRegionManager.instance
+            .detachFromScrollPosition(_lastScrollPosition!, this);
+      }
+      if (position != null) {
+        _HoverRegionManager.instance.attachToScrollPosition(position, this);
+      }
+      _lastScrollPosition = position;
     }
+
     if (_lastScrollPosition == null) {
       _scrolling = false;
     }
@@ -260,14 +327,17 @@ class _HoverRegionState extends State<HoverRegion> {
   @override
   void initState() {
     super.initState();
-    GestureBinding.instance.pointerRouter.addGlobalRoute(_onGlobalRoute);
+    _HoverRegionManager.instance.registerForGlobalRoute(this);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _resetScrollPosition();
-    GestureBinding.instance.pointerRouter.removeGlobalRoute(_onGlobalRoute);
+    _HoverRegionManager.instance.unregisterForGlobalRoute(this);
+    if (_lastScrollPosition != null) {
+      _HoverRegionManager.instance
+          .detachFromScrollPosition(_lastScrollPosition!, this);
+    }
   }
 
   // Workaround for iOS with UIApplicationSupportsIndirectInputEvents set to true.
