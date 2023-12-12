@@ -1,6 +1,6 @@
 name: headless_widgets
 description: "A set of widgets that implement robust logic for common controls, without making any assumption about the presentation."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/widgetbakery/headless_widgets
 
 environment:
