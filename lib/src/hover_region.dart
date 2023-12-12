@@ -117,19 +117,19 @@ class _HoverRegionManager {
   }
 
   void registerForGlobalRoute(_HoverRegionState region) {
-    _entryList.add(region);
+    _hoverRegions.add(region);
   }
 
   void unregisterForGlobalRoute(_HoverRegionState region) {
-    _entryList.remove(region);
+    _hoverRegions.remove(region);
   }
 
   final _positionToEntry = <ScrollPosition, _HoverRegionManagerEntry>{};
-  final _entryList = <_HoverRegionState>[];
+  final _hoverRegions = <_HoverRegionState>[];
 
   void _onGlobalRoute(PointerEvent event) {
     if (event is PointerHoverEvent || event is PointerUpEvent) {
-      for (final state in _entryList) {
+      for (final state in _hoverRegions) {
         state._onGlobalRoute(event);
       }
     }
