@@ -366,6 +366,11 @@ class _HoverRegionState extends State<HoverRegion> {
   }
 
   void _onHover(PointerHoverEvent event) {
+    if (kIsWeb && event.kind == PointerDeviceKind.touch) {
+      // There seems to be a hover event on tap dispatched on web that is never
+      // followed by PointerExitEvent. This is a workaround for that.
+      return;
+    }
     if (_preventNotifications) {
       _pendingHover = event;
     } else {
