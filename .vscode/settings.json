@@ -1,4 +1,3 @@
 {
-    "dart.lineLength": 100,
-    "dart.flutterSdkPath": "~/Projects/flutter/stable",
+    "dart.flutterSdkPath": "~/Projects/flutter/flutter",
 }

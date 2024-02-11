@@ -1495,7 +1495,7 @@ void main() {
     });
   });
   group('keyboard navigation', () {
-    testWidgets('disabled button can\'t be focused', (tester) async {
+    testWidgets("disabled button can't be focused", (tester) async {
       late ControlState state1;
       late ControlState state2;
       late ControlState state3;

@@ -47,7 +47,7 @@ class _FocusPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (focus > 0) {
-      double opacity = focus;
+      final opacity = focus;
 
       final paint = Paint()
         ..color = Colors.deepOrange.shade200.withOpacity(opacity);

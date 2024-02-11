@@ -30,9 +30,10 @@ void testWidgetsFakeAsync(
   );
 }
 
-bool get isMouse => (defaultTargetPlatform == TargetPlatform.macOS ||
+bool get isMouse =>
+    defaultTargetPlatform == TargetPlatform.macOS ||
     defaultTargetPlatform == TargetPlatform.linux ||
-    defaultTargetPlatform == TargetPlatform.windows);
+    defaultTargetPlatform == TargetPlatform.windows;
 
 bool get isTouch => !isMouse;
 

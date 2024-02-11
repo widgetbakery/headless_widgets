@@ -1,12 +1,11 @@
 // ignore_for_file: avoid_print
 
-import 'package:example/popover_delegate.dart';
-import 'package:flutter/material.dart' show Colors, Typography;
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Colors, Typography;
 import 'package:headless_widgets/headless_widgets.dart';
 import 'package:pixel_snap/widgets.dart';
 
+import 'popover_delegate.dart';
 import 'widgets.dart';
 
 void main() {

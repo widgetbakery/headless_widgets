@@ -7,6 +7,7 @@
         {
             "name": "example",
             "request": "launch",
+            "flutterMode": "debug",
             "type": "dart",
             "cwd": "example",
             "toolArgs": [
@@ -19,14 +20,22 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
-            "cwd": "example"
+            "cwd": "example",
+            "toolArgs": [
+                "--local-engine=ios_profile",
+                "--local-engine-host=host_debug_unopt_arm64",
+            ]
         },
         {
             "name": "example (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",
-            "cwd": "example"
+            "cwd": "example",
+            "toolArgs": [
+                "--local-engine=ios_release",
+                "--local-engine-host=host_debug_unopt_arm64",
+            ],
         }
     ]
 }
