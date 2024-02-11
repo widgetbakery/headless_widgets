@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:cupertino_rrect/cupertino_rrect.dart';
 import 'package:flutter/foundation.dart';
@@ -64,7 +64,7 @@ class SamplePopoverDelegate extends BasePopoverDelegate {
   @override
   Widget buildPopover(
     BuildContext context,
-    child,
+    Widget child,
     Animation<double> animation,
     ValueNotifier<PopoverGeometry?> geometry,
     double Function(bool calloutVisible) calloutHeightFactor,
@@ -236,8 +236,7 @@ class _PopoverPainter extends CustomPainter {
       size,
       geometry,
       (visible) {
-        heightFactor = getCalloutHeightFactor(visible);
-        return heightFactor;
+        return heightFactor = getCalloutHeightFactor(visible);
       },
     );
 

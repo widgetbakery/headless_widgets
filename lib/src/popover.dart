@@ -105,7 +105,7 @@ class _SizeMonitor extends SingleChildRenderObjectWidget {
     required this.onSizeChanged,
   }) : super(child: child);
 
-  final ValueChanged onSizeChanged;
+  final ValueChanged<Size> onSizeChanged;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -352,7 +352,7 @@ class _PopoverLayout extends MultiChildLayoutDelegate {
       final windowToUs = _RenderCustomMultiChildLayoutBox._currentLayout!
           .getTransformTo(null)
         ..invert();
-      final anchorRect = (Offset.zero & anchorSize());
+      final anchorRect = Offset.zero & anchorSize();
       final transformed = MatrixUtils.transformRect(
         windowToUs,
         MatrixUtils.transformRect(anchorToWindow, anchorRect),

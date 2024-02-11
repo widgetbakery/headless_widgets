@@ -279,7 +279,7 @@ class _ButtonState extends State<Button> {
     if (widgetResult != null) {
       return widgetResult;
     }
-    bool isTriggerKey = widget.triggerKeys.contains(event.logicalKey);
+    final isTriggerKey = widget.triggerKeys.contains(event.logicalKey);
 
     if (isTriggerKey) {
       if (event is KeyDownEvent) {
@@ -347,7 +347,7 @@ class _ButtonState extends State<Button> {
   }
 
   void _onPanUpdate(DragUpdateDetails details, PointerDeviceKind kind) {
-    Rect bounds = (Offset.zero & context.size!);
+    Rect bounds = Offset.zero & context.size!;
     if (kind == PointerDeviceKind.touch) {
       bounds = widget.touchExtraTolerance.inflateRect(bounds);
     } else if (kind == PointerDeviceKind.mouse) {
@@ -365,7 +365,7 @@ class _ButtonState extends State<Button> {
     _update(pointerPressed: false, inside: false, cancelled: true);
   }
 
-  _PanGestureRecognizer? _panGestureRecognizer;
+  late _PanGestureRecognizer _panGestureRecognizer;
 
   _ButtonGroupState? _buttonGroup;
 
@@ -379,9 +379,9 @@ class _ButtonState extends State<Button> {
 
   Map<Type, GestureRecognizerFactory> _buildGestures() {
     int currentPointer() =>
-        _panGestureRecognizer!._lastPointerDownEvent!.pointer;
+        _panGestureRecognizer._lastPointerDownEvent!.pointer;
     PointerDeviceKind currentDeviceKind() =>
-        _panGestureRecognizer!._lastPointerDownEvent!.kind;
+        _panGestureRecognizer._lastPointerDownEvent!.kind;
     return {
       TapGestureRecognizer:
           GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
@@ -420,7 +420,7 @@ class _ButtonState extends State<Button> {
         instance.onCancel = () {
           if (_buttonGroup != null) {
             _buttonGroup!._onPanCancel(
-              _panGestureRecognizer!._lastPointerDownEvent?.pointer ?? 0,
+              _panGestureRecognizer._lastPointerDownEvent?.pointer ?? 0,
             );
           } else {
             _onPanCancel();
@@ -517,7 +517,7 @@ class _ButtonGroupState extends State<ButtonGroup> {
         continue;
       }
       final local = getLocalPosition(globalPosition, button);
-      final rect = (Offset.zero & button.context.size!);
+      final rect = Offset.zero & button.context.size!;
       if (rect.contains(local)) {
         return button;
       }
