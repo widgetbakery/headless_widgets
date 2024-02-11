@@ -60,6 +60,7 @@ abstract class SizedMultiChildLayoutDelegate {
       _debugChildrenNeedingLayout!.remove(child);
       try {
         assert(constraints.debugAssertIsValid(isAppliedConstraint: true));
+        // ignore: avoid_catching_errors
       } on AssertionError catch (exception) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(

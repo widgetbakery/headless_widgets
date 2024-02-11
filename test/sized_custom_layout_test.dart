@@ -140,7 +140,7 @@ void main() {
     expect(delegate.performLayoutConstraints?.minHeight, 0.0);
     expect(delegate.performLayoutConstraints?.maxHeight, 600.0);
 
-    RenderBox box = tester.renderObject(
+    final RenderBox box = tester.renderObject(
       find.byType(SizedCustomMultiChildLayout),
     );
     expect(box.size.width, 200.0);
