@@ -101,7 +101,7 @@ class SliderState {
 class SliderGeometry {
   SliderGeometry({
     required this.sliderSize,
-    required this.trackPosition,
+    this.trackPosition = Offset.zero,
     required this.thumbPosition,
   });
 
@@ -141,7 +141,7 @@ class Slider extends StatefulWidget {
     required this.max,
     required this.value,
     this.secondaryValue,
-    required this.trackConstraints,
+    this.trackConstraints,
     required this.geometry,
     required this.thumbBuilder,
     required this.trackBuilder,
@@ -169,7 +169,7 @@ class Slider extends StatefulWidget {
   final ValueChanged<double>? onChanged;
   final void Function(SliderKeyboardAction action)? onKeyboardAction;
 
-  final TrackConstraintsProvider trackConstraints;
+  final TrackConstraintsProvider? trackConstraints;
   final SliderGeometryProvider geometry;
   final Duration animationDuration;
   final Curve animationCurve;
@@ -181,7 +181,11 @@ class Slider extends StatefulWidget {
   )? decorationBuilder;
 
   final Widget Function(BuildContext context, SliderState state) thumbBuilder;
-  final Widget Function(BuildContext context, SliderState state) trackBuilder;
+  final Widget Function(
+    BuildContext context,
+    SliderState state,
+    Size thubSize,
+  ) trackBuilder;
 
   /// Optional focus node to be used for this slider. If not specified
   /// slider will manage the focus node internally.
@@ -311,12 +315,12 @@ class _SliderState extends State<Slider>
     final double max;
     final double d;
     if (widget.axis == Axis.horizontal) {
-      min = thumbCenterMin.dx;
-      max = thumbCenterMax.dx;
+      min = _thumbCenterMin.dx;
+      max = _thumbCenterMax.dx;
       d = localPosition.dx;
     } else {
-      min = thumbCenterMin.dy;
-      max = thumbCenterMax.dy;
+      min = _thumbCenterMin.dy;
+      max = _thumbCenterMax.dy;
       d = localPosition.dy;
     }
     final position = ((d - min) / (max - min)).clamp(0.0, 1.0);
@@ -327,8 +331,10 @@ class _SliderState extends State<Slider>
     widget.onChanged?.call(value);
   }
 
-  Offset thumbCenterMin = Offset.zero;
-  Offset thumbCenterMax = Offset.zero;
+  Offset _thumbCenterMin = Offset.zero;
+  Offset _thumbCenterMax = Offset.zero;
+  Size _thumbSize = Size.infinite;
+
   bool _didHaveTicker = false;
 
   void _onDragDown(DragDownDetails details) {
@@ -386,15 +392,22 @@ class _SliderState extends State<Slider>
         geometry: widget.geometry,
         trackConstraints: widget.trackConstraints,
         onHaveThumbRange: (range) {
-          thumbCenterMin = range.$1;
-          thumbCenterMax = range.$2;
+          _thumbCenterMin = range.$1;
+          _thumbCenterMax = range.$2;
+        },
+        onHaveThumbSize: (size) {
+          _thumbSize = size;
         },
       ),
       children: [
         LayoutId(
           id: _SliderElementType.track,
-          child: Builder(
-            builder: (context) => widget.trackBuilder(context, state),
+          // Make sure to build after laid out so that w have thumb size.
+          child: LayoutBuilder(
+            builder: (context, BoxConstraints constraints) {
+              assert(_thumbSize.isFinite); // Should be set by layout delegate.
+              return widget.trackBuilder(context, state, _thumbSize);
+            },
           ),
         ),
         LayoutId(
@@ -469,15 +482,17 @@ enum _SliderElementType {
 
 class _SliderLayoutDelegate extends SizedMultiChildLayoutDelegate {
   final SliderState state;
-  final TrackConstraintsProvider trackConstraints;
+  final TrackConstraintsProvider? trackConstraints;
   final SliderGeometryProvider geometry;
   final ValueChanged<(Offset, Offset)> onHaveThumbRange;
+  final ValueChanged<Size> onHaveThumbSize;
 
   _SliderLayoutDelegate({
     required this.state,
     required this.trackConstraints,
     required this.geometry,
     required this.onHaveThumbRange,
+    required this.onHaveThumbSize,
   });
 
   @override
@@ -486,11 +501,13 @@ class _SliderLayoutDelegate extends SizedMultiChildLayoutDelegate {
       _SliderElementType.thumb,
       constraints.loosen(),
     );
-    final trackConstraints = this.trackConstraints(
-      state,
-      constraints,
-      thumbSize,
-    );
+    onHaveThumbSize(thumbSize);
+    final trackConstraints = this.trackConstraints?.call(
+              state,
+              constraints,
+              thumbSize,
+            ) ??
+        constraints;
     final trackSize = layoutChild(
       _SliderElementType.track,
       trackConstraints,
