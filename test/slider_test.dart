@@ -22,6 +22,14 @@ class _Track extends StatelessWidget {
   }
 }
 
+BoxConstraints _trackConstraints(
+  SliderState state,
+  BoxConstraints constraints,
+  Size thumbSize,
+) {
+  return constraints.tighten();
+}
+
 SliderGeometry _simpleHorizontalGeometry(SliderState state,
     BoxConstraints constraints, Size thumbSize, Size trackSize) {
   double fraction = state.effectiveFraction;
@@ -30,6 +38,7 @@ SliderGeometry _simpleHorizontalGeometry(SliderState state,
   }
   return SliderGeometry(
     sliderSize: Size(constraints.maxWidth, thumbSize.height),
+    trackPosition: Offset.zero,
     thumbPosition: Offset(
       (constraints.maxWidth - thumbSize.width) * fraction,
       0,
@@ -43,6 +52,7 @@ SliderGeometry _simpleVerticalGeometry(SliderState state,
   final fraction = 1.0 - state.effectiveFraction;
   return SliderGeometry(
     sliderSize: Size(thumbSize.width, constraints.maxHeight),
+    trackPosition: Offset.zero,
     thumbPosition: Offset(
       0,
       (constraints.maxHeight - thumbSize.height) * fraction,
@@ -63,9 +73,10 @@ void main() {
               min: 0,
               max: 100,
               value: value,
+              trackConstraints: _trackConstraints,
               geometry: _simpleHorizontalGeometry,
               thumbBuilder: (context, state) => _Thumb(),
-              trackBuilder: (context, state, thumbSize) => _Track(),
+              trackBuilder: (context, state) => _Track(),
               onChanged: (v) => value = v,
             ),
           ),
@@ -117,8 +128,9 @@ void main() {
               max: 100,
               value: value,
               geometry: _simpleHorizontalGeometry,
+              trackConstraints: _trackConstraints,
               thumbBuilder: (context, state) => _Thumb(),
-              trackBuilder: (context, state, thumbSize) => _Track(),
+              trackBuilder: (context, state) => _Track(),
               onChanged: (v) => value = v,
             ),
           ),
@@ -172,8 +184,9 @@ void main() {
               max: 100,
               value: value,
               geometry: _simpleVerticalGeometry,
+              trackConstraints: _trackConstraints,
               thumbBuilder: (context, state) => _Thumb(),
-              trackBuilder: (context, state, thumbSize) => _Track(),
+              trackBuilder: (context, state) => _Track(),
               onChanged: (v) => value = v,
             ),
           ),
@@ -227,8 +240,9 @@ void main() {
               max: 100,
               value: value,
               geometry: _simpleHorizontalGeometry,
+              trackConstraints: _trackConstraints,
               thumbBuilder: (context, state) => _Thumb(),
-              trackBuilder: (context, state, thumbSize) => _Track(),
+              trackBuilder: (context, state) => _Track(),
               onChanged: (v) => value = v,
             ),
           ),
