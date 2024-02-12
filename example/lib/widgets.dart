@@ -137,20 +137,31 @@ class SampleSlider extends StatelessWidget {
           ),
         );
       },
-      trackBuilder: (context, state, thumbSize) {
-        return Container(
-          height: thumbSize.height,
-          padding: EdgeInsets.symmetric(horizontal: thumbSize.width / 2),
-          child: Center(
-              child: Container(
+      trackConstraints: _trackConstraints,
+      trackBuilder: (context, state) {
+        return Center(
+          child: Container(
             height: 4,
             decoration: BoxDecoration(
               color: Colors.grey,
               borderRadius: BorderRadius.circular(2),
             ),
-          )),
+          ),
         );
       },
+    );
+  }
+
+  static BoxConstraints _trackConstraints(
+    SliderState state,
+    BoxConstraints constraints,
+    Size thumbSize,
+  ) {
+    return BoxConstraints(
+      minWidth: constraints.maxWidth - thumbSize.width,
+      maxWidth: constraints.maxWidth - thumbSize.width,
+      minHeight: thumbSize.height,
+      maxHeight: thumbSize.height,
     );
   }
 
@@ -163,6 +174,7 @@ class SampleSlider extends StatelessWidget {
   ) {
     return SliderGeometry(
       sliderSize: Size(constraints.maxWidth, thumbSize.height),
+      trackPosition: Offset(thumbSize.width / 2.0, 0),
       thumbPosition: Offset(
         ps(
           (constraints.maxWidth - thumbSize.width) * (state.effectiveFraction),

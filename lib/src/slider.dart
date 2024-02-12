@@ -103,7 +103,7 @@ class SliderState {
 class SliderGeometry {
   SliderGeometry({
     required this.sliderSize,
-    this.trackPosition = Offset.zero,
+    required this.trackPosition,
     required this.thumbPosition,
   });
 
@@ -143,7 +143,7 @@ class Slider extends StatefulWidget {
     required this.max,
     required this.value,
     this.secondaryValue,
-    this.trackConstraints,
+    required this.trackConstraints,
     required this.geometry,
     required this.thumbBuilder,
     required this.trackBuilder,
@@ -171,7 +171,7 @@ class Slider extends StatefulWidget {
   final ValueChanged<double>? onChanged;
   final void Function(SliderKeyboardAction action)? onKeyboardAction;
 
-  final TrackConstraintsProvider? trackConstraints;
+  final TrackConstraintsProvider trackConstraints;
   final SliderGeometryProvider geometry;
   final Duration animationDuration;
   final Curve animationCurve;
@@ -186,7 +186,6 @@ class Slider extends StatefulWidget {
   final Widget Function(
     BuildContext context,
     SliderState state,
-    Size thubSize,
   ) trackBuilder;
 
   /// Optional focus node to be used for this slider. If not specified
@@ -335,7 +334,6 @@ class _SliderState extends State<Slider>
 
   Offset _thumbCenterMin = Offset.zero;
   Offset _thumbCenterMax = Offset.zero;
-  Size _thumbSize = Size.infinite;
 
   bool _didHaveTicker = false;
 
@@ -397,20 +395,11 @@ class _SliderState extends State<Slider>
           _thumbCenterMin = range.$1;
           _thumbCenterMax = range.$2;
         },
-        onHaveThumbSize: (size) {
-          _thumbSize = size;
-        },
       ),
       children: [
         LayoutId(
           id: _SliderElementType.track,
-          // Make sure to build after laid out so that w have thumb size.
-          child: LayoutBuilder(
-            builder: (context, BoxConstraints constraints) {
-              assert(_thumbSize.isFinite); // Should be set by layout delegate.
-              return widget.trackBuilder(context, state, _thumbSize);
-            },
-          ),
+          child: widget.trackBuilder(context, state),
         ),
         LayoutId(
           id: _SliderElementType.thumb,
@@ -487,14 +476,12 @@ class _SliderLayoutDelegate extends SizedMultiChildLayoutDelegate {
   final TrackConstraintsProvider? trackConstraints;
   final SliderGeometryProvider geometry;
   final ValueChanged<(Offset, Offset)> onHaveThumbRange;
-  final ValueChanged<Size> onHaveThumbSize;
 
   _SliderLayoutDelegate({
     required this.state,
     required this.trackConstraints,
     required this.geometry,
     required this.onHaveThumbRange,
-    required this.onHaveThumbSize,
   });
 
   @override
@@ -503,7 +490,6 @@ class _SliderLayoutDelegate extends SizedMultiChildLayoutDelegate {
       _SliderElementType.thumb,
       constraints.loosen(),
     );
-    onHaveThumbSize(thumbSize);
     final trackConstraints = this.trackConstraints?.call(
               state,
               constraints,
