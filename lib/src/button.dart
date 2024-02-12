@@ -5,9 +5,107 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'control.dart';
+import 'focusable_control_mixin.dart';
 import 'hover_region.dart';
 
-typedef ButtonState = ControlState;
+class ButtonState {
+  ButtonState({
+    this.selected = SelectionState.off,
+    this.enabled = false,
+    this.focused = false,
+    this.hovered = false,
+    this.pressed = false,
+    this.tracked = false,
+  });
+
+  /// Determines selection state of the control.
+  final SelectionState selected;
+
+  /// Control is enabled and can be interacted with.
+  final bool enabled;
+
+  /// Control has keyboard focus.
+  final bool focused;
+
+  /// Control is being hovered over by a pointer.
+  final bool hovered;
+
+  /// Control is being pressed. When pointer is released without leaving the
+  /// control, the control will receive a tap event.
+  final bool pressed;
+
+  /// Control is receiving pointer events but the pointer may or may not be
+  /// hovering over the control.
+  final bool tracked;
+
+  /// Returns the state of the nearest control above this context, or null if
+  /// there is no control in the tree above this context.
+  static ButtonState? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<_ButtonStateProvider>()
+        ?.state;
+  }
+
+  /// Returns the state of the nearest control above this context.
+  static ButtonState of(BuildContext context) {
+    final state = ButtonState.maybeOf(context);
+    assert(state != null,
+        'ButtonState.of() called with a context that does not contain a Button.');
+    return state!;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ButtonState &&
+          other.selected == selected &&
+          other.enabled == enabled &&
+          other.focused == focused &&
+          other.hovered == hovered &&
+          other.pressed == pressed &&
+          other.tracked == tracked);
+
+  @override
+  int get hashCode => Object.hash(
+        selected,
+        enabled,
+        focused,
+        hovered,
+        pressed,
+        tracked,
+      );
+
+  @override
+  String toString() {
+    final res = StringBuffer();
+    void append(String text) {
+      if (res.isNotEmpty) {
+        res.write(', ');
+      }
+      res.write(text);
+    }
+
+    if (selected != SelectionState.off) {
+      append(selected.name);
+    }
+    if (enabled) {
+      append('enabled');
+    }
+    if (focused) {
+      append('focused');
+    }
+    if (hovered) {
+      append('hovered');
+    }
+    if (pressed) {
+      append('pressed');
+    }
+    if (tracked) {
+      append('tracked');
+    }
+    return 'ControlState($res)';
+  }
+}
 
 typedef ButtonBuilder = Widget Function(
   BuildContext context,
@@ -129,18 +227,7 @@ class ButtonGroup extends StatefulWidget {
 //
 //
 
-class _ButtonState extends State<Button> {
-  late FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-
-    focusNode = widget.focusNode ?? FocusNode(debugLabel: '$Button');
-    focusNode.onKeyEvent = _onKeyEvent;
-    focusNode.canRequestFocus = _enabled;
-  }
-
+class _ButtonState extends State<Button> with FocusableControlMixin<Button> {
   void _focusDidChange() {
     _keyUpTimer?.cancel();
     _keyUpTimer = null;
@@ -270,7 +357,8 @@ class _ButtonState extends State<Button> {
 
   bool _didFireLongPress = false;
 
-  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+  @override
+  KeyEventResult onKeyEvent(FocusNode node, KeyEvent event) {
     assert(node == focusNode);
     if (!_enabled) {
       return KeyEventResult.ignored;
@@ -297,25 +385,8 @@ class _ButtonState extends State<Button> {
   }
 
   @override
-  void didUpdateWidget(covariant Button oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.focusNode != null && widget.focusNode != focusNode) {
-      focusNode.onKeyEvent = null;
-      if (oldWidget.focusNode != null) {
-        focusNode.dispose();
-      }
-      focusNode = widget.focusNode!;
-      focusNode.onKeyEvent = _onKeyEvent;
-    }
-    focusNode.canRequestFocus = _enabled;
-  }
-
-  @override
   void dispose() {
     super.dispose();
-    if (widget.focusNode != focusNode) {
-      focusNode.dispose();
-    }
     _keyUpTimer?.cancel();
     _keyUpTimer = null;
     _pressedDownTimer?.cancel();
@@ -471,7 +542,7 @@ class _ButtonState extends State<Button> {
             behavior: widget.hitTestBehavior,
             key: _detector,
             gestures: _buildGestures(),
-            child: ControlStateProvider(
+            child: _ButtonStateProvider(
               state: state,
               child: widget.builder(context, state, widget.child),
             ),
@@ -480,6 +551,12 @@ class _ButtonState extends State<Button> {
       ),
     );
   }
+
+  @override
+  FocusNode? getWidgetFocusNode(Button widget) => widget.focusNode;
+
+  @override
+  bool get widgetIsEnabled => _enabled;
 }
 
 class _PanGestureRecognizer extends PanGestureRecognizer {
@@ -598,4 +675,18 @@ class _ButtonGroupState extends State<ButtonGroup> {
 
   final _pointerToButton = <int, _ButtonState>{};
   final _buttons = <_ButtonState>{};
+}
+
+class _ButtonStateProvider extends InheritedWidget {
+  const _ButtonStateProvider({
+    required super.child,
+    required this.state,
+  });
+
+  final ButtonState state;
+
+  @override
+  bool updateShouldNotify(covariant _ButtonStateProvider oldWidget) {
+    return oldWidget.state != state;
+  }
 }

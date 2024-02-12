@@ -5,3 +5,5 @@ export 'src/popover.dart';
 export 'src/popover_delegate.dart';
 export 'src/popover_geometry.dart';
 export 'src/renderer.dart';
+export 'src/sized_custom_layout.dart';
+export 'src/slider.dart';

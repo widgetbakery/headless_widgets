@@ -22,7 +22,7 @@ class _TestButton extends StatelessWidget {
 
   final FutureOr<void> Function()? onPressed;
   final FutureOr<void> Function()? onPressedDown;
-  final ValueChanged<ControlState> onStateChanged;
+  final ValueChanged<ButtonState> onStateChanged;
   final Duration pressDownDelay;
   final EdgeInsets touchExtraTolerance;
   final EdgeInsets mouseExtraTolerance;
@@ -36,8 +36,8 @@ class _TestButton extends StatelessWidget {
       onPressedDown: onPressedDown,
       pressDownDelay: pressDownDelay,
       keyUpTimeout: keyUpTimeout,
-      builder: (context, controlState, child) {
-        onStateChanged(controlState);
+      builder: (context, buttonState, child) {
+        onStateChanged(buttonState);
         return const SizedBox.square(
           dimension: 100,
         );
@@ -55,7 +55,7 @@ void main() {
       (tester) async {
         const button = ValueKey('button');
         bool pressed;
-        late ControlState state;
+        late ButtonState state;
         await tester.pumpWidget(
           Center(
             child: _TestButton(
@@ -79,21 +79,21 @@ void main() {
           await gesture.moveTo(Offset.zero);
           await tester.pump();
 
-          expect(state, ControlState(enabled: true));
+          expect(state, ButtonState(enabled: true));
 
           await gesture.down(tester.getCenter(find.byKey(button)));
           await tester.pump();
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressed, isFalse);
 
           await gesture.up();
           await tester.pump();
 
-          expect(state, ControlState(enabled: true, hovered: isMouse));
+          expect(state, ButtonState(enabled: true, hovered: isMouse));
           expect(pressed, isTrue);
         }
       },
@@ -106,7 +106,7 @@ void main() {
       'does not call onPressed when calling onPressedDown',
       (tester) async {
         const button = ValueKey('button');
-        late ControlState state;
+        late ButtonState state;
         bool pressed;
         bool pressedDown;
         final completer = [Completer<void>()];
@@ -142,7 +142,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressedDown, isTrue);
 
@@ -162,7 +162,7 @@ void main() {
           expect(pressed, isFalse);
           expect(
             state,
-            ControlState(enabled: true, hovered: isMouse),
+            ButtonState(enabled: true, hovered: isMouse),
           );
         }
       },
@@ -175,7 +175,7 @@ void main() {
       'pressDown works',
       (tester) async {
         const button = ValueKey('button');
-        late ControlState state;
+        late ButtonState state;
         bool pressedDown;
         final completer = [Completer<void>()];
 
@@ -206,7 +206,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressedDown, isTrue);
 
@@ -218,7 +218,7 @@ void main() {
 
             expect(
               state,
-              ControlState(enabled: true, hovered: isMouse, pressed: true),
+              ButtonState(enabled: true, hovered: isMouse, pressed: true),
             );
           }
 
@@ -232,7 +232,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, hovered: isMouse),
+            ButtonState(enabled: true, hovered: isMouse),
           );
         }
       },
@@ -245,7 +245,7 @@ void main() {
       'mouse down after onPressedDown completes keeps button pressed',
       (tester) async {
         const button = ValueKey('button');
-        late ControlState state;
+        late ButtonState state;
         bool pressedDown;
         final completer = [Completer<void>()];
 
@@ -276,7 +276,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressedDown, isTrue);
 
@@ -290,7 +290,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
 
           await gesture.up();
@@ -298,7 +298,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, hovered: isMouse),
+            ButtonState(enabled: true, hovered: isMouse),
           );
         }
       },
@@ -311,7 +311,7 @@ void main() {
       'pressDownDelay works',
       (tester, async) async {
         const button = ValueKey('button');
-        late ControlState state;
+        late ButtonState state;
         bool pressed;
         bool pressedDown;
         final completer = [Completer<void>()];
@@ -347,21 +347,21 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressedDown, isFalse);
 
           await Future.delayed(const Duration(milliseconds: 500));
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressedDown, isFalse);
 
           await Future.delayed(const Duration(milliseconds: 500));
           expect(
             state,
-            ControlState(enabled: true, hovered: true, pressed: true),
+            ButtonState(enabled: true, hovered: true, pressed: true),
           );
           expect(pressedDown, isTrue);
 
@@ -373,7 +373,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, hovered: isMouse),
+            ButtonState(enabled: true, hovered: isMouse),
           );
           expect(pressed, isFalse);
         }
@@ -387,7 +387,7 @@ void main() {
       'pressDownDelay not reached results in onPressed called',
       (tester, async) async {
         const button = ValueKey('button');
-        late ControlState state;
+        late ButtonState state;
         bool pressed;
         bool pressedDown;
         final completer = [Completer<void>()];
@@ -423,14 +423,14 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressedDown, isFalse);
 
           await Future.delayed(const Duration(milliseconds: 500));
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
           expect(pressedDown, isFalse);
 
@@ -440,7 +440,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, hovered: isMouse),
+            ButtonState(enabled: true, hovered: isMouse),
           );
 
           expect(pressed, isTrue);
@@ -461,7 +461,7 @@ void main() {
         (tester) async {
       const button = ValueKey('button');
       bool pressed;
-      late ControlState state;
+      late ButtonState state;
       late Completer<void> completer;
       await tester.pumpWidget(
         Center(
@@ -488,14 +488,14 @@ void main() {
         await gesture.moveTo(Offset.zero);
         await tester.pump();
 
-        expect(state, ControlState(enabled: true));
+        expect(state, ButtonState(enabled: true));
 
         await gesture.down(tester.getCenter(find.byKey(button)));
         await tester.pump();
 
         expect(
           state,
-          ControlState(enabled: true, tracked: true, pressed: true),
+          ButtonState(enabled: true, tracked: true, pressed: true),
         );
         expect(pressed, isFalse);
 
@@ -504,7 +504,7 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, tracked: false, pressed: true),
+          ButtonState(enabled: true, tracked: false, pressed: true),
         );
         expect(pressed, isTrue);
 
@@ -521,7 +521,7 @@ void main() {
         completer.complete();
         await tester.pumpAndSettle(); // required to flush microtasks.
 
-        expect(state, ControlState(enabled: true, hovered: isMouse));
+        expect(state, ButtonState(enabled: true, hovered: isMouse));
         expect(pressed, false);
       }
     });
@@ -530,11 +530,11 @@ void main() {
       'pressed state works correctly when dragging pointer',
       (tester) async {
         const button1 = ValueKey('button1');
-        late ControlState state1;
+        late ButtonState state1;
         bool pressed1;
 
         const button2 = ValueKey('button2');
-        late ControlState state2;
+        late ButtonState state2;
 
         await tester.pumpWidget(
           Center(
@@ -574,9 +574,9 @@ void main() {
 
           expect(
             state1,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
-          expect(state2, ControlState(enabled: true));
+          expect(state2, ButtonState(enabled: true));
 
           // First move accepts the gesture by the recognizer, second is needed to
           // invoke onUpdate callback.
@@ -585,10 +585,10 @@ void main() {
           await tester.pump();
 
           // Button 1 gets depressed, but remains tracked.
-          expect(state1, ControlState(tracked: true, enabled: true));
+          expect(state1, ButtonState(tracked: true, enabled: true));
 
           // Button 2 does not get hovered.
-          expect(state2, ControlState(enabled: true));
+          expect(state2, ButtonState(enabled: true));
 
           await gesture.moveTo(tester.getCenter(find.byKey(button1)));
           await tester.pump();
@@ -596,19 +596,19 @@ void main() {
           // Button 1 gets pressed again.
           expect(
             state1,
-            ControlState(enabled: true, pressed: true, tracked: true),
+            ButtonState(enabled: true, pressed: true, tracked: true),
           );
 
           // Button 2 remains same.
-          expect(state2, ControlState(enabled: true));
+          expect(state2, ButtonState(enabled: true));
 
           if (i == 0) {
             // First iteration, release when over button 1.
             await gesture.up();
             await tester.pump();
 
-            expect(state1, ControlState(enabled: true, hovered: isMouse));
-            expect(state2, ControlState(enabled: true));
+            expect(state1, ButtonState(enabled: true, hovered: isMouse));
+            expect(state2, ButtonState(enabled: true));
             expect(pressed1, isTrue);
           } else {
             // Second iteration, release when over button 2.
@@ -617,8 +617,8 @@ void main() {
             await gesture.up();
             await tester.pump();
 
-            expect(state1, ControlState(enabled: true));
-            expect(state2, ControlState(enabled: true, hovered: isMouse));
+            expect(state1, ButtonState(enabled: true));
+            expect(state2, ButtonState(enabled: true, hovered: isMouse));
             expect(pressed1, isFalse);
           }
         }
@@ -632,7 +632,7 @@ void main() {
       'touchExtraTolerance is respected',
       (tester) async {
         const button = ValueKey('button1');
-        late ControlState state;
+        late ButtonState state;
         bool pressed;
 
         await tester.pumpWidget(
@@ -664,7 +664,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
 
           await gesture.moveTo(tester.getTopLeft(finder));
@@ -672,7 +672,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
 
           await gesture.moveBy(const Offset(-10, -10));
@@ -680,20 +680,20 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: isTouch),
+            ButtonState(enabled: true, tracked: true, pressed: isTouch),
           );
 
           await gesture.moveBy(const Offset(-11, -11));
           await tester.pump();
 
-          expect(state, ControlState(enabled: true, tracked: true));
+          expect(state, ButtonState(enabled: true, tracked: true));
 
           await gesture.moveBy(const Offset(11, 11));
           await tester.pump();
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: isTouch),
+            ButtonState(enabled: true, tracked: true, pressed: isTouch),
           );
 
           await gesture.up();
@@ -701,7 +701,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true),
+            ButtonState(enabled: true),
           );
 
           expect(pressed, isTouch);
@@ -716,7 +716,7 @@ void main() {
       'mouseExtraTolerance is respected',
       (tester) async {
         const button = ValueKey('button1');
-        late ControlState state;
+        late ButtonState state;
         bool pressed;
 
         await tester.pumpWidget(
@@ -748,7 +748,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
 
           await gesture.moveTo(tester.getTopLeft(finder));
@@ -756,7 +756,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
 
           await gesture.moveBy(const Offset(-10, -10));
@@ -764,20 +764,20 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: isMouse),
+            ButtonState(enabled: true, tracked: true, pressed: isMouse),
           );
 
           await gesture.moveBy(const Offset(-11, -11));
           await tester.pump();
 
-          expect(state, ControlState(enabled: true, tracked: true));
+          expect(state, ButtonState(enabled: true, tracked: true));
 
           await gesture.moveBy(const Offset(11, 11));
           await tester.pump();
 
           expect(
             state,
-            ControlState(enabled: true, tracked: true, pressed: isMouse),
+            ButtonState(enabled: true, tracked: true, pressed: isMouse),
           );
 
           await gesture.up();
@@ -785,7 +785,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true),
+            ButtonState(enabled: true),
           );
 
           expect(pressed, isMouse);
@@ -802,15 +802,15 @@ void main() {
       'sliding works',
       (tester) async {
         const button1 = ValueKey('button1');
-        late ControlState state1;
+        late ButtonState state1;
         bool pressed1;
 
         const button2 = ValueKey('button2');
-        late ControlState state2;
+        late ButtonState state2;
         bool pressed2;
 
         const button3 = ValueKey('button3');
-        late ControlState state3;
+        late ButtonState state3;
         bool pressed3;
 
         await tester.pumpWidget(
@@ -868,49 +868,49 @@ void main() {
 
           expect(
             state1,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
-          expect(state2, ControlState(enabled: true));
-          expect(state3, ControlState(enabled: true));
+          expect(state2, ButtonState(enabled: true));
+          expect(state3, ButtonState(enabled: true));
 
           await gesture.moveTo(tester.getCenter(find.byKey(button3)));
           // Needed to invoke onUpdate callback.
           await gesture.moveBy(const Offset(1, 1));
           await tester.pump();
 
-          expect(state1, ControlState(enabled: true));
-          expect(state2, ControlState(enabled: true));
+          expect(state1, ButtonState(enabled: true));
+          expect(state2, ButtonState(enabled: true));
           expect(
             state3,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
 
           await gesture.moveBy(const Offset(0, 200));
           await tester.pump();
 
-          expect(state1, ControlState(enabled: true));
-          expect(state2, ControlState(enabled: true));
+          expect(state1, ButtonState(enabled: true));
+          expect(state2, ButtonState(enabled: true));
           expect(
             state3,
-            ControlState(enabled: true, tracked: true, pressed: false),
+            ButtonState(enabled: true, tracked: true, pressed: false),
           );
 
           await gesture.moveTo(tester.getCenter(find.byKey(button2)));
           await tester.pump();
 
-          expect(state1, ControlState(enabled: true));
+          expect(state1, ButtonState(enabled: true));
           expect(
             state2,
-            ControlState(enabled: true, tracked: true, pressed: true),
+            ButtonState(enabled: true, tracked: true, pressed: true),
           );
-          expect(state3, ControlState(enabled: true));
+          expect(state3, ButtonState(enabled: true));
 
           await gesture.up();
           await tester.pump();
 
-          expect(state1, ControlState(enabled: true));
-          expect(state2, ControlState(enabled: true, hovered: isMouse));
-          expect(state3, ControlState(enabled: true));
+          expect(state1, ButtonState(enabled: true));
+          expect(state2, ButtonState(enabled: true, hovered: isMouse));
+          expect(state3, ButtonState(enabled: true));
 
           expect(pressed1, isFalse);
           expect(pressed2, isTrue);
@@ -924,11 +924,11 @@ void main() {
 
     testWidgets('disabled button is ignored', (tester) async {
       const button1 = ValueKey('button1');
-      late ControlState state1;
+      late ButtonState state1;
       bool pressed1;
 
       const button2 = ValueKey('button2');
-      late ControlState state2;
+      late ButtonState state2;
 
       await tester.pumpWidget(
         Center(
@@ -972,9 +972,9 @@ void main() {
 
         expect(
           state1,
-          ControlState(enabled: true, tracked: true, pressed: true),
+          ButtonState(enabled: true, tracked: true, pressed: true),
         );
-        expect(state2, ControlState());
+        expect(state2, ButtonState());
 
         await gesture.moveTo(tester.getCenter(find.byKey(button2)));
         // Needed to invoke onUpdate callback.
@@ -983,26 +983,26 @@ void main() {
 
         expect(
           state1,
-          ControlState(enabled: true, tracked: true, pressed: false),
+          ButtonState(enabled: true, tracked: true, pressed: false),
         );
-        expect(state2, ControlState());
+        expect(state2, ButtonState());
 
         await gesture.up();
         await tester.pump();
 
-        expect(state1, ControlState(enabled: true));
-        expect(state2, ControlState());
+        expect(state1, ButtonState(enabled: true));
+        expect(state2, ButtonState());
         expect(pressed1, isFalse);
       }
     });
 
     testWidgets('can start on disabled button', (tester) async {
       const button1 = ValueKey('button1');
-      late ControlState state1;
+      late ButtonState state1;
       bool pressed1;
 
       const button2 = ValueKey('button2');
-      late ControlState state2;
+      late ButtonState state2;
 
       await tester.pumpWidget(
         Center(
@@ -1044,8 +1044,8 @@ void main() {
         await gesture.down(tester.getCenter(find.byKey(button2)));
         await tester.pump();
 
-        expect(state1, ControlState(enabled: true));
-        expect(state2, ControlState());
+        expect(state1, ButtonState(enabled: true));
+        expect(state2, ButtonState());
 
         await gesture.moveTo(tester.getCenter(find.byKey(button1)));
         // Needed to invoke onUpdate callback.
@@ -1054,15 +1054,15 @@ void main() {
 
         expect(
           state1,
-          ControlState(enabled: true, tracked: true, pressed: true),
+          ButtonState(enabled: true, tracked: true, pressed: true),
         );
-        expect(state2, ControlState());
+        expect(state2, ButtonState());
 
         await gesture.up();
         await tester.pump();
 
-        expect(state1, ControlState(enabled: true, hovered: isMouse));
-        expect(state2, ControlState());
+        expect(state1, ButtonState(enabled: true, hovered: isMouse));
+        expect(state2, ButtonState());
         expect(pressed1, isTrue);
       }
     });
@@ -1072,7 +1072,7 @@ void main() {
     testWidgets('space triggers onPressed', (tester) async {
       const button = ValueKey('button');
       bool pressed;
-      late ControlState state;
+      late ButtonState state;
       await tester.pumpWidget(
         Center(
           child: _TestButton(
@@ -1087,12 +1087,12 @@ void main() {
         ),
       );
 
-      expect(state, ControlState(enabled: true));
+      expect(state, ButtonState(enabled: true));
 
       final focus = tester.widget<Focus>(find.bySubtype<Focus>());
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
-      expect(state, ControlState(enabled: true, focused: true));
+      expect(state, ButtonState(enabled: true, focused: true));
 
       for (int i = 0; i < 2; ++i) {
         pressed = false;
@@ -1102,13 +1102,13 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressed, isFalse);
 
         await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
         await tester.pump();
-        expect(state, ControlState(enabled: true, focused: true));
+        expect(state, ButtonState(enabled: true, focused: true));
 
         expect(pressed, isTrue);
       }
@@ -1116,7 +1116,7 @@ void main() {
 
     testWidgets('space triggers onPressedDown', (tester) async {
       const button = ValueKey('button');
-      late ControlState state;
+      late ButtonState state;
       bool pressed;
       bool pressedDown;
       final completer = [Completer<void>()];
@@ -1142,7 +1142,7 @@ void main() {
       final focus = tester.widget<Focus>(find.bySubtype<Focus>());
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
-      expect(state, ControlState(enabled: true, focused: true));
+      expect(state, ButtonState(enabled: true, focused: true));
 
       for (int i = 0; i < 2; ++i) {
         pressed = false;
@@ -1154,7 +1154,7 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressedDown, isTrue);
 
@@ -1167,14 +1167,14 @@ void main() {
         await tester.pumpAndSettle(); // required to flush microtasks.
 
         expect(pressed, isFalse);
-        expect(state, ControlState(enabled: true, focused: true));
+        expect(state, ButtonState(enabled: true, focused: true));
       }
     });
 
     testWidgets('key down after onPressedDown completes keeps button presed',
         (tester) async {
       const button = ValueKey('button');
-      late ControlState state;
+      late ButtonState state;
       bool pressedDown;
       final completer = [Completer<void>()];
 
@@ -1196,7 +1196,7 @@ void main() {
       final focus = tester.widget<Focus>(find.bySubtype<Focus>());
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
-      expect(state, ControlState(enabled: true, focused: true));
+      expect(state, ButtonState(enabled: true, focused: true));
 
       for (int i = 0; i < 2; ++i) {
         pressedDown = false;
@@ -1207,7 +1207,7 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressedDown, isTrue);
 
@@ -1216,20 +1216,20 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
 
         await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
         await tester.pump();
 
-        expect(state, ControlState(enabled: true, focused: true));
+        expect(state, ButtonState(enabled: true, focused: true));
       }
     });
 
     testWidgetsFakeAsync('pressDownDelay works with space',
         (tester, async) async {
       const button = ValueKey('button');
-      late ControlState state;
+      late ButtonState state;
       bool pressed;
       bool pressedDown;
       final completer = [Completer<void>()];
@@ -1256,7 +1256,7 @@ void main() {
       final focus = tester.widget<Focus>(find.bySubtype<Focus>());
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
-      expect(state, ControlState(enabled: true, focused: true));
+      expect(state, ButtonState(enabled: true, focused: true));
 
       for (int i = 0; i < 2; ++i) {
         pressed = false;
@@ -1267,21 +1267,21 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressedDown, isFalse);
 
         await Future.delayed(const Duration(milliseconds: 500));
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressedDown, isFalse);
 
         await Future.delayed(const Duration(milliseconds: 500));
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressedDown, isTrue);
 
@@ -1293,7 +1293,7 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true),
+          ButtonState(enabled: true),
         );
         expect(pressed, isFalse);
       }
@@ -1303,7 +1303,7 @@ void main() {
       'pressDownDelay not reached results in onPressed called',
       (tester, async) async {
         const button = ValueKey('button');
-        late ControlState state;
+        late ButtonState state;
         bool pressed;
         bool pressedDown;
         final completer = [Completer<void>()];
@@ -1330,7 +1330,7 @@ void main() {
         final focus = tester.widget<Focus>(find.bySubtype<Focus>());
         focus.focusNode!.requestFocus();
         await tester.pumpAndSettle();
-        expect(state, ControlState(enabled: true, focused: true));
+        expect(state, ButtonState(enabled: true, focused: true));
 
         for (int i = 0; i < 2; ++i) {
           pressed = false;
@@ -1341,14 +1341,14 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, focused: true, pressed: true),
+            ButtonState(enabled: true, focused: true, pressed: true),
           );
           expect(pressedDown, isFalse);
 
           await Future.delayed(const Duration(milliseconds: 500));
           expect(
             state,
-            ControlState(enabled: true, focused: true, pressed: true),
+            ButtonState(enabled: true, focused: true, pressed: true),
           );
           expect(pressedDown, isFalse);
 
@@ -1358,7 +1358,7 @@ void main() {
 
           expect(
             state,
-            ControlState(enabled: true, focused: true),
+            ButtonState(enabled: true, focused: true),
           );
 
           expect(pressed, isTrue);
@@ -1374,7 +1374,7 @@ void main() {
 
     testWidgetsFakeAsync('keyUpTimeout works', (tester, async) async {
       const button = ValueKey('button');
-      late ControlState state;
+      late ButtonState state;
       bool pressed;
 
       await tester.pumpWidget(
@@ -1395,7 +1395,7 @@ void main() {
       final focus = tester.widget<Focus>(find.bySubtype<Focus>());
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
-      expect(state, ControlState(enabled: true, focused: true));
+      expect(state, ButtonState(enabled: true, focused: true));
 
       for (int i = 0; i < 2; ++i) {
         pressed = false;
@@ -1405,7 +1405,7 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressed, isFalse);
 
@@ -1414,7 +1414,7 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressed, isTrue);
 
@@ -1430,7 +1430,7 @@ void main() {
     testWidgetsFakeAsync('keyUpTimeout is ignored with onPressedDown',
         (tester, async) async {
       const button = ValueKey('button');
-      late ControlState state;
+      late ButtonState state;
       bool pressed;
       bool pressedDown;
       final completer = [Completer<void>()];
@@ -1458,7 +1458,7 @@ void main() {
       final focus = tester.widget<Focus>(find.bySubtype<Focus>());
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
-      expect(state, ControlState(enabled: true, focused: true));
+      expect(state, ButtonState(enabled: true, focused: true));
 
       for (int i = 0; i < 2; ++i) {
         pressed = false;
@@ -1469,14 +1469,14 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressedDown, isFalse);
 
         await Future.delayed(const Duration(milliseconds: 1000));
         expect(
           state,
-          ControlState(enabled: true, focused: true, pressed: true),
+          ButtonState(enabled: true, focused: true, pressed: true),
         );
         expect(pressedDown, isTrue);
 
@@ -1488,7 +1488,7 @@ void main() {
 
         expect(
           state,
-          ControlState(enabled: true),
+          ButtonState(enabled: true),
         );
         expect(pressed, isFalse);
       }
@@ -1496,9 +1496,9 @@ void main() {
   });
   group('keyboard navigation', () {
     testWidgets("disabled button can't be focused", (tester) async {
-      late ControlState state1;
-      late ControlState state2;
-      late ControlState state3;
+      late ButtonState state1;
+      late ButtonState state2;
+      late ButtonState state3;
 
       await tester.pumpWidget(
         TestApp(
@@ -1529,23 +1529,23 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(focused: true, enabled: true));
-      expect(state2, ControlState());
-      expect(state3, ControlState(enabled: true));
+      expect(state1, ButtonState(focused: true, enabled: true));
+      expect(state2, ButtonState());
+      expect(state3, ButtonState(enabled: true));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(enabled: true));
-      expect(state2, ControlState());
-      expect(state3, ControlState(enabled: true, focused: true));
+      expect(state1, ButtonState(enabled: true));
+      expect(state2, ButtonState());
+      expect(state3, ButtonState(enabled: true, focused: true));
     });
 
     testWidgets('disabling/enabling button updates focusability',
         (tester) async {
-      late ControlState state1;
-      late ControlState state2;
-      late ControlState state3;
+      late ButtonState state1;
+      late ButtonState state2;
+      late ButtonState state3;
 
       await tester.pumpWidget(
         TestApp(
@@ -1576,9 +1576,9 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(focused: true, enabled: true));
-      expect(state2, ControlState(enabled: true));
-      expect(state3, ControlState());
+      expect(state1, ButtonState(focused: true, enabled: true));
+      expect(state2, ButtonState(enabled: true));
+      expect(state3, ButtonState());
 
       await tester.pumpWidget(
         TestApp(
@@ -1611,14 +1611,14 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(enabled: true));
-      expect(state2, ControlState());
-      expect(state3, ControlState(enabled: true, focused: true));
+      expect(state1, ButtonState(enabled: true));
+      expect(state2, ButtonState());
+      expect(state3, ButtonState(enabled: true, focused: true));
     });
 
     testWidgets('unfocusing pressed button does not submit', (tester) async {
-      late ControlState state1;
-      late ControlState state2;
+      late ButtonState state1;
+      late ButtonState state2;
       bool pressed = false;
 
       await tester.pumpWidget(
@@ -1647,20 +1647,20 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(focused: true, enabled: true));
-      expect(state2, ControlState(enabled: true));
+      expect(state1, ButtonState(focused: true, enabled: true));
+      expect(state2, ButtonState(enabled: true));
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
       await tester.pump();
 
-      expect(state1, ControlState(focused: true, enabled: true, pressed: true));
-      expect(state2, ControlState(enabled: true));
+      expect(state1, ButtonState(focused: true, enabled: true, pressed: true));
+      expect(state2, ButtonState(enabled: true));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(enabled: true));
-      expect(state2, ControlState(enabled: true, focused: true));
+      expect(state1, ButtonState(enabled: true));
+      expect(state2, ButtonState(enabled: true, focused: true));
 
       await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
       await tester.pump();
@@ -1670,8 +1670,8 @@ void main() {
 
     testWidgetsFakeAsync('unfocusing armed button does not submit',
         (tester, async) async {
-      late ControlState state1;
-      late ControlState state2;
+      late ButtonState state1;
+      late ButtonState state2;
       bool pressed = false;
       await tester.pumpWidget(
         TestApp(
@@ -1699,22 +1699,22 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(focused: true, enabled: true));
-      expect(state2, ControlState(enabled: true));
+      expect(state1, ButtonState(focused: true, enabled: true));
+      expect(state2, ButtonState(enabled: true));
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
       await tester.pump();
 
-      expect(state1, ControlState(focused: true, enabled: true, pressed: true));
-      expect(state2, ControlState(enabled: true));
+      expect(state1, ButtonState(focused: true, enabled: true, pressed: true));
+      expect(state2, ButtonState(enabled: true));
 
       async.elapse(const Duration(milliseconds: 300));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(state1, ControlState(enabled: true));
-      expect(state2, ControlState(enabled: true, focused: true));
+      expect(state1, ButtonState(enabled: true));
+      expect(state2, ButtonState(enabled: true, focused: true));
 
       async.elapse(const Duration(milliseconds: 300));
 

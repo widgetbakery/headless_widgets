@@ -54,12 +54,12 @@ class MinimalApp extends StatelessWidget {
 
 class _Section extends StatelessWidget {
   final String title;
-  final String description;
+  final String? description;
   final Widget child;
 
   const _Section({
     required this.title,
-    required this.description,
+    this.description,
     required this.child,
   });
 
@@ -87,10 +87,11 @@ class _Section extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            description,
-            style: TextStyle(color: Colors.grey.shade800),
-          ),
+          if (description != null)
+            Text(
+              description!,
+              style: TextStyle(color: Colors.grey.shade800),
+            ),
           const SizedBox(height: 12),
           child,
         ],
@@ -226,6 +227,58 @@ class _PopoverButtonState extends State<PopoverButton> {
   }
 }
 
+class _SliderExample extends StatefulWidget {
+  const _SliderExample();
+
+  @override
+  State<_SliderExample> createState() => _SliderExampleState();
+}
+
+class _SliderExampleState extends State<_SliderExample> {
+  double value = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 200,
+          child: SampleSlider(
+            min: 0,
+            max: 10,
+            value: value,
+            onKeyboardAction: (action) {
+              switch (action) {
+                case SliderKeyboardAction.increase:
+                  setState(() {
+                    value = (value + 1).clamp(0, 10).toDouble();
+                  });
+                case SliderKeyboardAction.decrease:
+                  setState(() {
+                    value = (value - 1).clamp(0, 10).toDouble();
+                  });
+              }
+            },
+            onChanged: (value) {
+              final newValue = value;
+              if (newValue != this.value) {
+                setState(() {
+                  this.value = newValue;
+                });
+              }
+            },
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          'Value: ${value.toStringAsFixed(2)}',
+          style: const TextStyle(color: Colors.black),
+        ),
+      ],
+    );
+  }
+}
+
 final controller = PixelSnapScrollController();
 
 class MainApp extends StatelessWidget {
@@ -242,53 +295,55 @@ class MainApp extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _Section(
-                  title: 'Regular Button',
-                  description:
-                      'Requires tab to focus. Default behavior on most platforms.',
-                  child: _ButtonRow(
-                    children: [
-                      SampleButton(
-                        onPressed: () {
-                          print('Pressed 1');
-                        },
-                        child: const Text('Button 1'),
-                      ),
-                      SampleButton(
-                        onPressed: () {
-                          print('Pressed 2');
-                        },
-                        child: const Text('Button 2'),
-                      ),
-                      const SampleButton(
-                        child: Text('Disabled'),
-                      ),
-                    ],
-                  )),
+                title: 'Regular Button',
+                description:
+                    'Requires tab to focus. Default behavior on most platforms.',
+                child: _ButtonRow(
+                  children: [
+                    SampleButton(
+                      onPressed: () {
+                        print('Pressed 1');
+                      },
+                      child: const Text('Button 1'),
+                    ),
+                    SampleButton(
+                      onPressed: () {
+                        print('Pressed 2');
+                      },
+                      child: const Text('Button 2'),
+                    ),
+                    const SampleButton(
+                      child: Text('Disabled'),
+                    ),
+                  ],
+                ),
+              ),
               _Section(
-                  title: 'Tap to Focus',
-                  description: 'Button focuses itself on pointer interaction.',
-                  child: _ButtonRow(
-                    children: [
-                      SampleButton(
-                        tapToFocus: true,
-                        onPressed: () {
-                          print('Pressed 1');
-                        },
-                        child: const Text('Button 1'),
-                      ),
-                      SampleButton(
-                        tapToFocus: true,
-                        onPressed: () {
-                          print('Pressed 2');
-                        },
-                        child: const Text('Button 2'),
-                      ),
-                      const SampleButton(
-                        tapToFocus: true,
-                        child: Text('Disabled'),
-                      ),
-                    ],
-                  )),
+                title: 'Tap to Focus',
+                description: 'Button focuses itself on pointer interaction.',
+                child: _ButtonRow(
+                  children: [
+                    SampleButton(
+                      tapToFocus: true,
+                      onPressed: () {
+                        print('Pressed 1');
+                      },
+                      child: const Text('Button 1'),
+                    ),
+                    SampleButton(
+                      tapToFocus: true,
+                      onPressed: () {
+                        print('Pressed 2');
+                      },
+                      child: const Text('Button 2'),
+                    ),
+                    const SampleButton(
+                      tapToFocus: true,
+                      child: Text('Disabled'),
+                    ),
+                  ],
+                ),
+              ),
               const _Section(
                 title: 'Popover',
                 description: 'Button shows popover when pressed',
@@ -306,31 +361,38 @@ class MainApp extends StatelessWidget {
                 ),
               ),
               _Section(
-                  title: 'KeyUp timeout',
-                  description:
-                      'onPressed callback is called after keyUpTimeout if key is held down. Default behavior on macOS and Linux.',
-                  child: _ButtonRow(
-                    children: [
-                      SampleButton(
-                        keyUpTimeout: const Duration(milliseconds: 250),
-                        onPressed: () {
-                          print('Pressed 1');
-                        },
-                        child: const Text('Button 1'),
-                      ),
-                      SampleButton(
-                        keyUpTimeout: const Duration(milliseconds: 250),
-                        onPressed: () {
-                          print('Pressed 2');
-                        },
-                        child: const Text('Button 2'),
-                      ),
-                      const SampleButton(
-                        keyUpTimeout: Duration(milliseconds: 250),
-                        child: Text('Disabled'),
-                      ),
-                    ],
-                  )),
+                title: 'KeyUp timeout',
+                description:
+                    'onPressed callback is called after keyUpTimeout if key is held down. Default behavior on macOS and Linux.',
+                child: _ButtonRow(
+                  children: [
+                    SampleButton(
+                      keyUpTimeout: const Duration(milliseconds: 250),
+                      onPressed: () {
+                        print('Pressed 1');
+                      },
+                      child: const Text('Button 1'),
+                    ),
+                    SampleButton(
+                      keyUpTimeout: const Duration(milliseconds: 250),
+                      onPressed: () {
+                        print('Pressed 2');
+                      },
+                      child: const Text('Button 2'),
+                    ),
+                    const SampleButton(
+                      keyUpTimeout: Duration(milliseconds: 250),
+                      child: Text('Disabled'),
+                    ),
+                  ],
+                ),
+              ),
+              const _Section(
+                title: 'Slider',
+                child: Row(children: [
+                  _SliderExample(),
+                ]),
+              ),
             ],
           ),
         ),
