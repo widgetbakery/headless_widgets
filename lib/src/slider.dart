@@ -53,7 +53,8 @@ class SliderState {
           other.max == max &&
           other.effectiveValue == effectiveValue &&
           other.targetValue == targetValue &&
-          other.secondaryValue == secondaryValue);
+          other.secondaryValue == secondaryValue &&
+          other.textDirection == textDirection);
 
   @override
   int get hashCode => Object.hash(
@@ -67,6 +68,7 @@ class SliderState {
         effectiveValue,
         targetValue,
         secondaryValue,
+        textDirection,
       );
 
   SliderState copyWith({

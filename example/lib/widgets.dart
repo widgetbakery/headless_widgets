@@ -10,10 +10,12 @@ class FocusIndicator extends StatelessWidget {
     super.key,
     required this.focused,
     required this.child,
+    this.readius = 8.0,
   });
 
   final bool focused;
   final Widget child;
+  final double readius;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +27,7 @@ class FocusIndicator extends StatelessWidget {
         return CustomPaint(
           painter: _FocusPainter(
             pixelSnap: PixelSnap.of(context),
+            radius: readius,
             focus: focus,
           ),
           child: child,
@@ -37,11 +40,13 @@ class FocusIndicator extends StatelessWidget {
 
 class _FocusPainter extends CustomPainter {
   final double focus;
+  final double radius;
   final PixelSnap pixelSnap;
 
   _FocusPainter({
     required this.pixelSnap,
     required this.focus,
+    required this.radius,
   });
 
   @override
@@ -52,7 +57,7 @@ class _FocusPainter extends CustomPainter {
       final paint = Paint()
         ..color = Colors.deepOrange.shade200.withOpacity(opacity);
 
-      final radius = const Radius.circular(8).pixelSnap(pixelSnap);
+      final radius = Radius.circular(this.radius).pixelSnap(pixelSnap);
       var rect = (Offset.zero & size).pixelSnap(pixelSnap).inflate(2);
 
       canvas.translate(rect.width / 2.0, rect.height / 2.0);
@@ -73,6 +78,98 @@ class _FocusPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _FocusPainter oldDelegate) {
     return focus != oldDelegate.focus;
+  }
+}
+
+class SampleSlider extends StatelessWidget {
+  const SampleSlider({
+    super.key,
+    required this.min,
+    required this.max,
+    required this.value,
+    required this.onChanged,
+    this.onKeyboardAction,
+  });
+
+  final double min;
+  final double max;
+  final double value;
+  final ValueChanged<double>? onChanged;
+  final void Function(SliderKeyboardAction action)? onKeyboardAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Slider(
+      min: min,
+      max: max,
+      value: value,
+      onChanged: onChanged,
+      onKeyboardAction: onKeyboardAction,
+      animationDuration: const Duration(milliseconds: 200),
+      animationCurve: Curves.easeOutCubic,
+      geometry: (state, constraints, trackSize, thumbSize) => _geometry(
+        state,
+        constraints,
+        trackSize,
+        thumbSize,
+        PixelSnap.of(context),
+      ),
+      thumbBuilder: (context, state) {
+        final backgroundColor = switch (state) {
+          SliderState(tracked: true) => Colors.blue.shade400,
+          SliderState(hovered: true) => Colors.blue.shade50,
+          _ => Colors.white,
+        };
+        return FocusIndicator(
+          readius: 12.0,
+          focused: state.focused,
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              border: Border.all(
+                color: Colors.blueGrey,
+                width: 1,
+              ),
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
+      trackBuilder: (context, state, thumbSize) {
+        return Container(
+          height: thumbSize.height,
+          padding: EdgeInsets.symmetric(horizontal: thumbSize.width / 2),
+          child: Center(
+              child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          )),
+        );
+      },
+    );
+  }
+
+  static SliderGeometry _geometry(
+    SliderState state,
+    BoxConstraints constraints,
+    Size thumbSize,
+    Size trackSize,
+    PixelSnap ps,
+  ) {
+    return SliderGeometry(
+      sliderSize: Size(constraints.maxWidth, thumbSize.height),
+      thumbPosition: Offset(
+        ps(
+          (constraints.maxWidth - thumbSize.width) * (state.effectiveFraction),
+        ),
+        0,
+      ),
+    );
   }
 }
 
