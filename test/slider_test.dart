@@ -290,4 +290,41 @@ void main() {
       await tester.pump();
     }
   });
+  testWidgets('empty range', (tester) async {
+    double value = 0;
+    Future<void> pumpSlider() async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            child: Slider(
+              min: 0,
+              max: 0,
+              value: value,
+              trackConstraints: _trackConstraints,
+              geometry: _simpleHorizontalGeometry,
+              thumbBuilder: (context, state) => _Thumb(),
+              trackBuilder: (context, state) => _Track(),
+              onChanged: (v) => value = v,
+            ),
+          ),
+        ),
+      ));
+    }
+
+    await pumpSlider();
+    expect(
+      tester.getTopLeft(find.byType(_Thumb)),
+      tester.getTopLeft(find.byType(Slider)),
+    );
+    // Tap slider in the middle
+    await tester.tapAt(tester.getCenter(find.byType(Slider)));
+    expect(value, 0);
+    await pumpSlider();
+    expect(
+      tester.getTopLeft(find.byType(_Thumb)),
+      tester.getTopLeft(find.byType(Slider)),
+    );
+  });
 }

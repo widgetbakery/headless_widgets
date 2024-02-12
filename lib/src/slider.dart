@@ -37,7 +37,11 @@ class SliderState {
   final TextDirection textDirection;
 
   double get effectiveFraction {
-    return (effectiveValue - min) / (max - min);
+    if (max == min) {
+      return 0.0;
+    } else {
+      return (effectiveValue - min) / (max - min);
+    }
   }
 
   @override
