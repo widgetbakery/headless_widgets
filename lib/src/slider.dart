@@ -418,9 +418,17 @@ class _SliderState extends State<Slider>
       res = widget.decorationBuilder!(context, state, res);
     }
 
+    const supportedDevices = {
+      PointerDeviceKind.mouse,
+      PointerDeviceKind.touch,
+      PointerDeviceKind.stylus,
+      PointerDeviceKind.invertedStylus,
+    };
+
     if (widget.axis == Axis.horizontal) {
       res = GestureDetector(
         behavior: HitTestBehavior.opaque,
+        supportedDevices: supportedDevices,
         onHorizontalDragDown: _onDragDown,
         onHorizontalDragUpdate: _onDragUpdate,
         onHorizontalDragEnd: _onDragEnd,
@@ -430,6 +438,7 @@ class _SliderState extends State<Slider>
     } else {
       res = GestureDetector(
         behavior: HitTestBehavior.opaque,
+        supportedDevices: supportedDevices,
         onVerticalDragDown: _onDragDown,
         onVerticalDragUpdate: _onDragUpdate,
         onVerticalDragEnd: _onDragEnd,
