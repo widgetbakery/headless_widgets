@@ -1,9 +1,9 @@
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:js' as js;
+import 'dart:js_interop' as js;
+import 'dart:js_interop_unsafe';
 
 import 'renderer.dart';
 
-final isCanvasKit = js.context['flutterCanvasKit'] != null;
+final isCanvasKit = js.globalContext['flutterCanvasKit'] != null;
 
 FlutterRenderer getCurrentRendererImpl() {
   return isCanvasKit ? FlutterRenderer.canvasKit : FlutterRenderer.html;
