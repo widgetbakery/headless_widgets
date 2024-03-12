@@ -146,7 +146,11 @@ class _HoverRegionManagerEntry {
     position.addListener(_scrollingDidChange);
   }
 
+  bool _disposed = false;
+
   void dispose() {
+    assert(!_disposed);
+    _disposed = true;
     position.isScrollingNotifier.removeListener(_scrollingDidChange);
     position.removeListener(_scrollingDidChange);
 
@@ -158,6 +162,9 @@ class _HoverRegionManagerEntry {
     // Schedule at the end of frame because this might be called from
     // ScrollPosition.applyNewDimensions, which is invoked during layout.
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (_disposed) {
+        return;
+      }
       // macOS ends isScrolling when when lifting fingers from touchpad, which is
       // nice, on other platforms we rely on a timeout.
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
@@ -195,6 +202,7 @@ class _HoverRegionState extends State<HoverRegion> {
   PointerEnterEvent? _pendingEnter;
   PointerHoverEvent? _pendingHover;
   PointerExitEvent? _pendingExit;
+  // Set when pointer is pressed while exiting the region.
   int? _pendingExitPointer;
   int? _ignoredEnterPointer;
 
@@ -235,7 +243,7 @@ class _HoverRegionState extends State<HoverRegion> {
         }
         _pendingEnter = null;
         _pendingHover = null;
-      } else if (_pendingExit != null) {
+      } else if (_pendingExit != null && _pendingExitPointer == null) {
         widget.onExit?.call(_pendingExit!);
         _inside = false;
         _pendingExit = null;

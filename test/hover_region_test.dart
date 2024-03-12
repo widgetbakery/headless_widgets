@@ -390,4 +390,53 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.macOS),
   );
+  testWidgets('button and scroll', (tester) async {
+    final region1 = _MouseRegionState();
+    const widget1 = Key('Widget1');
+    await tester.pumpWidget(SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 200),
+          _MouseRegion(
+              state: region1,
+              child: const SizedBox.square(
+                dimension: 100,
+                key: widget1,
+              )),
+          const SizedBox(height: 10000),
+        ],
+      ),
+    ));
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(pointer.hover(
+      tester.getCenter(find.byKey(widget1)),
+    ));
+    await tester.pump();
+    await tester.sendEventToBinding(pointer.down(
+      tester.getCenter(find.byKey(widget1)),
+    ));
+    await tester.pump();
+    await tester.sendEventToBinding(
+      pointer.move(
+        tester.getCenter(find.byKey(widget1)).translate(0, -100),
+      ),
+    );
+    await tester.pump();
+    final pointer2 = TestPointer(2, PointerDeviceKind.trackpad);
+    await tester.sendEventToBinding(pointer2.panZoomStart(
+      tester.getCenter(find.byKey(widget1)),
+    ));
+    // Scroll, but not enough for mouse to enter the region.
+    await tester.sendEventToBinding(pointer2.panZoomUpdate(
+      tester.getCenter(find.byKey(widget1)),
+      pan: const Offset(0, -20),
+      timeStamp: const Duration(milliseconds: 10),
+    ));
+    await tester.pumpAndSettle();
+    await tester.sendEventToBinding(pointer2.panZoomEnd());
+    await tester.pumpAndSettle();
+
+    await tester.sendEventToBinding(pointer.up());
+    await tester.pump();
+  });
 }
