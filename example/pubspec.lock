@@ -73,7 +73,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.3"
+    version: "0.0.4"
   leak_tracker:
     dependency: transitive
     description:
@@ -216,5 +216,5 @@ packages:
     source: hosted
     version: "14.0.0"
 sdks:
-  dart: ">=3.3.0-0 <4.0.0"
+  dart: ">=3.3.0 <4.0.0"
   flutter: ">=3.18.0-18.0.pre.54"
