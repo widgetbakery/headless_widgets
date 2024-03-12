@@ -241,6 +241,8 @@ class _ButtonState extends State<Button> with FocusableControlMixin<Button> {
       }
     } else if (_keyPressed) {
       _keyPressed = false;
+      _keyUpTimer?.cancel();
+      _keyUpTimer = null;
     }
   }
 
