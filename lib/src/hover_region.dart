@@ -380,6 +380,10 @@ class _HoverRegionState extends State<HoverRegion> {
       // that is never followed by PointerExitEvent. This is a workaround for that.
       return;
     }
+    if (event.kind == PointerDeviceKind.trackpad) {
+      // Trackpad and magic mouse on macOS. Safe to ignore.
+      return;
+    }
     if (_preventNotifications) {
       _pendingHover = event;
     } else {
