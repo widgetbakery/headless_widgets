@@ -274,19 +274,6 @@ class _HoverRegionState extends State<HoverRegion> {
     }
   }
 
-  static bool? _runningInTester;
-
-  // Flutter tester does not synthesize hover events on mouse up,
-  // unlike native platforms.
-  static bool _needSynthetizeHoverOnUp() {
-    if (kIsWeb) {
-      _runningInTester = false;
-    } else {
-      _runningInTester ??= Platform.environment.containsKey('FLUTTER_TEST');
-    }
-    return _runningInTester!;
-  }
-
   void _onGlobalRoute(PointerEvent event) {
     if (event is PointerHoverEvent) {
       _updateScrolling(false);
@@ -294,32 +281,30 @@ class _HoverRegionState extends State<HoverRegion> {
     if (event is PointerUpEvent) {
       if (event.pointer == _ignoredEnterPointer) {
         _ignoredEnterPointer = null;
-        if (_needSynthetizeHoverOnUp()) {
-          _onHover(PointerHoverEvent(
-            viewId: event.viewId,
-            timeStamp: event.timeStamp,
-            kind: event.kind,
-            pointer: 0,
-            device: event.device,
-            position: event.position,
-            delta: event.delta,
-            buttons: event.buttons,
-            obscured: event.obscured,
-            pressureMin: event.pressureMin,
-            pressureMax: event.pressureMax,
-            distance: event.distance,
-            distanceMax: event.distanceMax,
-            size: event.size,
-            radiusMajor: event.radiusMajor,
-            radiusMinor: event.radiusMinor,
-            radiusMin: event.radiusMin,
-            radiusMax: event.radiusMax,
-            orientation: event.orientation,
-            tilt: event.tilt,
-            synthesized: event.synthesized,
-            embedderId: event.embedderId,
-          ));
-        }
+        _onHover(PointerHoverEvent(
+          viewId: event.viewId,
+          timeStamp: event.timeStamp,
+          kind: event.kind,
+          pointer: 0,
+          device: event.device,
+          position: event.position,
+          delta: event.delta,
+          buttons: event.buttons,
+          obscured: event.obscured,
+          pressureMin: event.pressureMin,
+          pressureMax: event.pressureMax,
+          distance: event.distance,
+          distanceMax: event.distanceMax,
+          size: event.size,
+          radiusMajor: event.radiusMajor,
+          radiusMinor: event.radiusMinor,
+          radiusMin: event.radiusMin,
+          radiusMax: event.radiusMax,
+          orientation: event.orientation,
+          tilt: event.tilt,
+          synthesized: event.synthesized,
+          embedderId: event.embedderId,
+        ));
       }
       if (event.pointer == _pendingExitPointer) {
         assert(_pendingExit != null);

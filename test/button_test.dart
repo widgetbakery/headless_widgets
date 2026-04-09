@@ -1089,7 +1089,10 @@ void main() {
 
       expect(state, ButtonState(enabled: true));
 
-      final focus = tester.widget<Focus>(find.bySubtype<Focus>());
+      final focus = tester.widget<Focus>(find.descendant(
+        of: find.byKey(button),
+        matching: find.bySubtype<Focus>(),
+      ));
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
       expect(state, ButtonState(enabled: true, focused: true));
@@ -1139,7 +1142,10 @@ void main() {
         ),
       );
 
-      final focus = tester.widget<Focus>(find.bySubtype<Focus>());
+      final focus = tester.widget<Focus>(find.descendant(
+        of: find.byKey(button),
+        matching: find.bySubtype<Focus>(),
+      ));
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
       expect(state, ButtonState(enabled: true, focused: true));
@@ -1193,7 +1199,10 @@ void main() {
         ),
       );
 
-      final focus = tester.widget<Focus>(find.bySubtype<Focus>());
+      final focus = tester.widget<Focus>(find.descendant(
+        of: find.byKey(button),
+        matching: find.bySubtype<Focus>(),
+      ));
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
       expect(state, ButtonState(enabled: true, focused: true));
@@ -1253,7 +1262,10 @@ void main() {
         ),
       );
 
-      final focus = tester.widget<Focus>(find.bySubtype<Focus>());
+      final focus = tester.widget<Focus>(find.descendant(
+        of: find.byKey(button),
+        matching: find.bySubtype<Focus>(),
+      ));
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
       expect(state, ButtonState(enabled: true, focused: true));
@@ -1327,7 +1339,10 @@ void main() {
           ),
         );
 
-        final focus = tester.widget<Focus>(find.bySubtype<Focus>());
+        final focus = tester.widget<Focus>(find.descendant(
+          of: find.byKey(button),
+          matching: find.bySubtype<Focus>(),
+        ));
         focus.focusNode!.requestFocus();
         await tester.pumpAndSettle();
         expect(state, ButtonState(enabled: true, focused: true));
@@ -1392,7 +1407,10 @@ void main() {
         ),
       );
 
-      final focus = tester.widget<Focus>(find.bySubtype<Focus>());
+      final focus = tester.widget<Focus>(find.descendant(
+        of: find.byKey(button),
+        matching: find.bySubtype<Focus>(),
+      ));
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
       expect(state, ButtonState(enabled: true, focused: true));
@@ -1455,7 +1473,10 @@ void main() {
         ),
       );
 
-      final focus = tester.widget<Focus>(find.bySubtype<Focus>());
+      final focus = tester.widget<Focus>(find.descendant(
+        of: find.byKey(button),
+        matching: find.bySubtype<Focus>(),
+      ));
       focus.focusNode!.requestFocus();
       await tester.pumpAndSettle();
       expect(state, ButtonState(enabled: true, focused: true));
