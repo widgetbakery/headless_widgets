@@ -258,7 +258,7 @@ class _PopoverPainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = Colors.black.withOpacity(0.2)
+        ..color = Colors.black.withValues(alpha: 0.2)
         ..style = PaintingStyle.fill
         ..maskFilter = MaskFilter.blur(
           brokenBlurStyleOuter ? BlurStyle.normal : BlurStyle.outer,
