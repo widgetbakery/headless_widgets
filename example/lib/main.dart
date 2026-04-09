@@ -102,7 +102,7 @@ class _Section extends StatelessWidget {
 
 class _ButtonRow extends StatelessWidget {
   const _ButtonRow({
-    // ignore: unused_element
+    // ignore: unused_element_parameter
     super.key,
     required this.children,
   });
@@ -123,7 +123,7 @@ class _ButtonRow extends StatelessWidget {
 
 class _Popover extends StatefulWidget {
   const _Popover({
-    // ignore: unused_element
+    // ignore: unused_element_parameter
     super.key,
     required this.controller,
   });
@@ -141,7 +141,7 @@ class _PopoverState extends State<_Popover> {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.4),
+        color: Colors.white.withValues(alpha: 0.4),
       ),
       child: SafeArea(
         child: AnimatedPadding(

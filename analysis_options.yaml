@@ -13,3 +13,4 @@ linter:
     prefer_constructors_over_static_methods: false
     sort_pub_dependencies: false
     cast_nullable_to_non_nullable: false
+    avoid_futureor_void: false

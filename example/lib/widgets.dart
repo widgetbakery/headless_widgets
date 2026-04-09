@@ -55,7 +55,7 @@ class _FocusPainter extends CustomPainter {
       final opacity = focus;
 
       final paint = Paint()
-        ..color = Colors.deepOrange.shade200.withOpacity(opacity);
+        ..color = Colors.deepOrange.shade200.withValues(alpha: opacity);
 
       final radius = Radius.circular(this.radius).pixelSnap(pixelSnap);
       var rect = (Offset.zero & size).pixelSnap(pixelSnap).inflate(2);
@@ -256,7 +256,7 @@ class SampleButton extends StatelessWidget {
           shadows: [
             BoxShadow(
               blurStyle: BlurStyle.outer,
-              color: Colors.black.withOpacity(shadowOpacity),
+              color: Colors.black.withValues(alpha: shadowOpacity),
               blurRadius: 3,
             ),
           ],
