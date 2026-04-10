@@ -127,7 +127,10 @@ class _HoverRegionManager {
   final _hoverRegions = <_HoverRegionState>[];
 
   void _onGlobalRoute(PointerEvent event) {
-    if (event is PointerHoverEvent || event is PointerUpEvent) {
+    if (event is PointerHoverEvent ||
+        event is PointerUpEvent ||
+        event is PointerDownEvent ||
+        event is PointerCancelEvent) {
       for (final state in _hoverRegions) {
         state._onGlobalRoute(event);
       }
@@ -197,6 +200,10 @@ class _HoverRegionManagerEntry {
   final _regions = <_HoverRegionState>[];
 }
 
+void _log(String message) {
+  // debugPrint(message);
+}
+
 class _HoverRegionState extends State<HoverRegion> {
   PointerEnterEvent? _pendingEnter;
   PointerHoverEvent? _pendingHover;
@@ -213,6 +220,7 @@ class _HoverRegionState extends State<HoverRegion> {
   bool __inside = false;
   set _inside(bool v) {
     if (v != __inside) {
+      _log('setting inside to $v');
       setState(() {
         __inside = v;
       });
@@ -232,6 +240,9 @@ class _HoverRegionState extends State<HoverRegion> {
   bool get _preventNotifications => _scrolling;
 
   void _flush() {
+    _log('Flush: prevent notifications: $_preventNotifications, '
+        'pending enter: $_pendingEnter, pending hover: $_pendingHover, '
+        'pending exit: $_pendingExit');
     if (!_preventNotifications) {
       assert(_pendingEnter == null || _pendingExit == null);
       if (_pendingEnter != null) {
@@ -273,12 +284,21 @@ class _HoverRegionState extends State<HoverRegion> {
     }
   }
 
+  final _pointersDown = <int>{};
+
   void _onGlobalRoute(PointerEvent event) {
     if (event is PointerHoverEvent) {
       _updateScrolling(false);
     }
+    if (event is PointerDownEvent) {
+      _pointersDown.add(event.pointer);
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _pointersDown.remove(event.pointer);
+    }
     if (event is PointerUpEvent) {
+      _log('global route: for pointer up event ${event.pointer}');
       if (event.pointer == _ignoredEnterPointer) {
+        _log('global route: clearing ignoring enter pointer ${event.pointer}');
         _ignoredEnterPointer = null;
         _onHover(PointerHoverEvent(
           viewId: event.viewId,
@@ -306,6 +326,7 @@ class _HoverRegionState extends State<HoverRegion> {
         ));
       }
       if (event.pointer == _pendingExitPointer) {
+        _log('global route: for pending exit pointer ${event.pointer}');
         assert(_pendingExit != null);
         assert(_inside);
         widget.onExit?.call(_pendingExit!);
@@ -338,6 +359,16 @@ class _HoverRegionState extends State<HoverRegion> {
   int _depth = 0;
 
   void _onEnter(PointerEnterEvent event) {
+    final down = _pointersDown.contains(event.pointer);
+    _log('on enter: begin - depth: $_depth, pointer ${event.pointer}, '
+        'down: ${_pointersDown.contains(event.pointer)}');
+
+    if (down != event.down) {
+      // Sometimes the event.down is cleared too late. The global route is called
+      // from event dispatch, while mouse tracker updates are called from frame callback.
+      _log('on enter: pointer down state mismatch');
+    }
+
     ++_depth;
     if (_depth > 1) {
       return;
@@ -345,12 +376,17 @@ class _HoverRegionState extends State<HoverRegion> {
 
     _pendingExitPointer = null;
     _pendingExit = null;
-    if (!_inside && event.down) {
+    if (!_inside && down) {
       _ignoredEnterPointer = event.pointer;
+      _log(
+          'on enter: button pressed, !inside, ignoring pointer ${event.pointer}');
     } else if (!_inside) {
       if (_preventNotifications) {
+        _log(
+            'on enter: !inside, preventing notification, storing pending enter');
         _pendingEnter = event;
       } else {
+        _log('on enter: !inside, notifying enter');
         _inside = true;
         widget.onEnter?.call(event);
       }
@@ -369,9 +405,11 @@ class _HoverRegionState extends State<HoverRegion> {
       return;
     }
     if (_preventNotifications) {
+      _log('on hover: preventing notification, storing pending hover');
       _pendingHover = event;
     } else {
       if (!_inside) {
+        _log('on hover: !inside, notifying enter');
         _inside = true;
         widget.onEnter?.call(PointerEnterEvent(
           viewId: event.viewId,
@@ -399,13 +437,24 @@ class _HoverRegionState extends State<HoverRegion> {
           embedderId: event.embedderId,
         ));
       }
+      _log('on hover: notifying hover');
       widget.onHover?.call(event);
     }
   }
 
   void _onExit(PointerExitEvent event) {
+    _log('on exit: begin - depth: $_depth');
     if (_ignoredEnterPointer == event.pointer) {
+      _log('on exit: clearing ignoring enter pointer ${event.pointer}');
       _ignoredEnterPointer = null;
+    }
+
+    final down = _pointersDown.contains(event.pointer);
+
+    if (down != event.down) {
+      // Sometimes the event.down is cleared too late.
+      // from event dispatch, while mouse tracker updates are called from frame callback.
+      _log('on exit: pointer down state mismatch');
     }
 
     --_depth;
@@ -414,16 +463,22 @@ class _HoverRegionState extends State<HoverRegion> {
     }
 
     if (_inside) {
-      if (event.down) {
+      if (down) {
+        _log(
+            'on exit: inside, button pressed, storing pending exit for pointer ${event.pointer}');
         _pendingExitPointer = event.pointer;
         _pendingExit = event;
       } else if (_preventNotifications) {
+        _log('on exit: inside, preventing notification, storing pending exit');
         _pendingExitPointer = null;
         _pendingExit = event;
       } else {
+        _log('on exit: inside, notifying exit');
         _inside = false;
         widget.onExit?.call(event);
       }
+    } else {
+      _log('on exit: !inside, ignoring');
     }
     _pendingEnter = null;
     _pendingHover = null;
